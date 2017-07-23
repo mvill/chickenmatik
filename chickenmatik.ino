@@ -7,6 +7,8 @@ const int UP_BUTTON_PIN = 8;
 const int RIGHT_BUTTON_PIN = 9;
 const int OK_BUTTON_PIN = 10;
 
+const int LED_PIN = A0;
+
 const int NB_BUTTONS = 5;
 
 
@@ -92,15 +94,60 @@ void setup() {
   pinMode(RIGHT_BUTTON_PIN, INPUT);
   pinMode(OK_BUTTON_PIN, INPUT);
   
+  pinMode(LED_PIN, OUTPUT);
+  
   
   
   // set up the LCD's number of columns and rows: 
   lcd.begin(16, 2);
   // Print a message to the LCD.
   lcd.print("hello, world!");
+  
+  
+  
+}                          
+
+
+
+
+
+int lastLoopTime = 0;
+
+const int LOOP_LED_INTERVAL = 100;
+const int LED_CHANGE_INTERVAL = 1000;
+int lastLedLoopTime;
+int lastLedChangeTime;
+int ledState = LOW;
+
+void loopLed(){
+  int currentMs = millis();
+  if( currentMs > lastLedChangeTime + LED_CHANGE_INTERVAL){
+    lastLedChangeTime = currentMs;
+    if( ledState == LOW ){
+      ledState = HIGH;
+    }
+    else{
+      ledState = LOW;
+    }
+    digitalWrite( LED_PIN, ledState );
+  }
 }
 
+
+
+
 void loop() {
+  
+  
+  int currentMs = millis();
+  if( currentMs > lastLedLoopTime + LOOP_LED_INTERVAL ){
+    lastLedLoopTime = currentMs;
+    loopLed();
+  }
+  
+  
+  
+  
   
   
   // read the state of the pushbutton value:

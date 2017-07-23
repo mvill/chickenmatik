@@ -7,7 +7,7 @@ typedef struct {
   const char** items;     // Tableau de choix du menu
   const uint8_t nbItems;  // Nombre de choix possibles
   void (*callbackFnct)(uint8_t menuItemSelected); // Pointeur sur fonction pour gérer le choix de l'utilisateur
-} Menu_t;
+} Menu_t;                                                             
  
 /* Listes des touches de la shield lcd DFrobots */
 /*
@@ -21,11 +21,15 @@ typedef enum {
   BP_RST	 // Bouton RST
 } Button_t;*/
  
- 
+
+typedef enum {
+  MAIN_SCREEN,
+  MENU_SCREEN
+} State_t;
 
 typedef struct {
-  int pin;
-  String label;     // Titre du menu
+  const int pin;
+  const String label;     // Titre du menu
   int state;
 } Button_t;
  
