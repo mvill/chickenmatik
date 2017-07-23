@@ -36,7 +36,7 @@ Button_t okButton = {
       LOW
     };
     
-Button_t buttons[] = {downButton, leftButton, upButton, rightButton, okButton};
+Button_t buttons[NB_BUTTONS] = {downButton, leftButton, upButton, rightButton, okButton};
 
 
 
@@ -45,15 +45,16 @@ Button_t buttons[] = {downButton, leftButton, upButton, rightButton, okButton};
 LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
 
 
-void handleButtonPressed(Button_t &button){
+void handleButtonPressed(Button_t* button){
+  lcd.print("                   ");
   lcd.setCursor(0, 1);
   //lcd.print(button.label);
-  lcd.print(String(button.label + " HIGH"));
-  if( button.state == HIGH){
-    lcd.print(String(button.label + " HIGH"));
+  //lcd.print(String(button->label + " HIGH"));
+  if( button->state == HIGH){
+    lcd.print(String(button->label + " HIGH"));
   }
   else{
-    lcd.print(String(button.label + " LOW"));
+    lcd.print(String(button->label + " LOW"));
   }
   
 }
@@ -65,18 +66,18 @@ void refreshButtonsState(){
       //Serial.println(sizeof(buttons));
   
   for (int i = 0; i < NB_BUTTONS; i++) {
-    Button_t button = buttons[i];
-    int newState = digitalRead(button.pin);
-    if( newState !=  button.state){
+    Button_t* button = &buttons[i];
+    int newState = digitalRead(button->pin);
+    if( newState !=  button->state){
         
       Serial.println("AAAA");
       //Serial.println(button.label);
-      Serial.println(button.state);
+      Serial.println(button->state);
       //Serial.println(String(newState));
-        button.state = newState;
-      Serial.println(button.state);
+        button->state = newState;
+      Serial.println(button->state);
       Serial.println("BBBB");
-        handleButtonPressed(button);
+      handleButtonPressed(button);
     }
   }
 }
