@@ -256,7 +256,7 @@ void loop() {
   
   if( currentMs > lastDisplayTimeTime + LOOP_DISPLAY_TIME_INTERVAL ){
     lastDisplayTimeTime = currentMs;
-    //loopDisplayTime();
+    loopDisplayTime();
   }
   
   
