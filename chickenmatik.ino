@@ -216,10 +216,16 @@ void loopDisplayTime(){
   
   unsigned long currentMs = millis();
   unsigned long allSeconds = currentMs/1000;
-  unsigned long seconds = currentMs/1000 % 60;
-  unsigned long mins = seconds/60 % 60;
-  unsigned long hours = hours/60;
-  displayMenu(String( String(hours) + "h" + String(mins) + "m" + String(seconds) + "s"     +     " " +  String(allSeconds) + "ss"  ));
+  unsigned long seconds = allSeconds % 60;
+  unsigned long mins = allSeconds/60 % 60;
+  unsigned long hours = allSeconds/3600;
+  
+  
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print(String(String(allSeconds) + "ss"));
+    lcd.setCursor(0, 1);
+    lcd.print(String( String(hours) + "h" + String(mins) + "m" + String(seconds) + "s"));
   
 }
 
