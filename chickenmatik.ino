@@ -205,9 +205,23 @@ void loopLed(){
     }
     digitalWrite( LED_PIN, ledState );
   }
+  
+  
 }
 
+int lastDisplayTimeTime;
+const int LOOP_DISPLAY_TIME_INTERVAL = 100;
 
+void loopDisplayTime(){
+  
+  unsigned long currentMs = millis();
+  unsigned long allSeconds = currentMs/1000;
+  unsigned long seconds = currentMs/1000 % 60;
+  unsigned long mins = seconds/60 % 60;
+  unsigned long hours = hours/60;
+  displayMenu(String( String(hours) + "h" + String(mins) + "m" + String(seconds) + "s"     +     " " +  String(allSeconds) + "ss"  ));
+  
+}
 
 
 void loop() {
@@ -219,6 +233,10 @@ void loop() {
     loopLed();
   }
   
+  if( currentMs > lastDisplayTimeTime + LOOP_DISPLAY_TIME_INTERVAL ){
+    lastDisplayTimeTime = currentMs;
+    loopDisplayTime();
+  }
   
   
   
