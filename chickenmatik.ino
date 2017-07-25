@@ -99,17 +99,32 @@ void handleButtonPressed(Button_t* button){
   else if(SCREEN_MENU_TIME.equals(currentScreen) && button->label == "DOWN"){
     showMenuUpTime();
   }
+  else if(SCREEN_MENU_TIME.equals(currentScreen) && button->label == "UP"){
+    showMenuDownPosition();
+  }
   else if(SCREEN_MENU_UP_TIME.equals(currentScreen) && button->label == "DOWN"){
     showMenuDownTime();
+  }
+  else if(SCREEN_MENU_UP_TIME.equals(currentScreen) && button->label == "UP"){
+    showMenuTime();
   }
   else if(SCREEN_MENU_DOWN_TIME.equals(currentScreen) && button->label == "DOWN"){
     showMenuUpPosition();
   }
+  else if(SCREEN_MENU_DOWN_TIME.equals(currentScreen) && button->label == "UP"){
+    showMenuUpTime();
+  }
   else if(SCREEN_MENU_UP_POSITION.equals(currentScreen) && button->label == "DOWN"){
     showMenuDownPosition();
   }
+  else if(SCREEN_MENU_UP_POSITION.equals(currentScreen) && button->label == "UP"){
+    showMenuDownTime();
+  }
   else if(SCREEN_MENU_DOWN_POSITION.equals(currentScreen) && button->label == "DOWN"){
     showMenuTime();
+  }
+  else if(SCREEN_MENU_DOWN_POSITION.equals(currentScreen) && button->label == "UP"){
+    showMenuUpPosition();
   }
   else if(SCREEN_MENU_TIME.equals(currentScreen) && button->label == "OK"){
     displayMenu("TODO");
@@ -241,7 +256,7 @@ void loop() {
   
   if( currentMs > lastDisplayTimeTime + LOOP_DISPLAY_TIME_INTERVAL ){
     lastDisplayTimeTime = currentMs;
-    loopDisplayTime();
+    //loopDisplayTime();
   }
   
   
