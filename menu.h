@@ -21,11 +21,12 @@ typedef enum {
   BP_RST	 // Bouton RST
 } Button_t;*/
  
-
+/*
 typedef enum {
   MAIN_SCREEN,
   MENU_SCREEN
 } State_t;
+*/
 
 typedef struct {
   const int pin;

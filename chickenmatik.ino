@@ -43,20 +43,91 @@ Button_t buttons[NB_BUTTONS] = {downButton, leftButton, upButton, rightButton, o
 
 
 
+//TODO make enum
+const String SCREEN_MAIN = "MAIN_SCREEN";
+const String SCREEN_MENU_TIME = "MENU_TIME";
+const String SCREEN_MENU_UP_TIME = "MENU_UP_TIME";
+const String SCREEN_MENU_DOWN_TIME = "MENU_DOWN_TIME";
+const String SCREEN_MENU_UP_POSITION = "MENU_UP_POSITION";
+const String SCREEN_MENU_DOWN_POSITION = "MENU_DOWN_POSITION";
+
+String currentScreen = "MAIN_SCREEN";
+
+
 // initialize the library with the numbers of the interface pins
 LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
 
+void displayMenu( String menuItemLabel ){
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("MENU");
+    lcd.setCursor(0, 1);
+    lcd.print(menuItemLabel);
+}
+
+void showMenuTime(){
+  displayMenu("Heure");
+  currentScreen = SCREEN_MENU_TIME;
+}
+
+void showMenuUpTime(){
+  displayMenu("Heure de lever");
+  currentScreen = SCREEN_MENU_UP_TIME;
+}
+
+void showMenuDownTime(){
+  displayMenu("Heure de coucher");
+  currentScreen = SCREEN_MENU_DOWN_TIME;
+}
+
+void showMenuUpPosition(){
+  displayMenu("Position haute");
+  currentScreen = SCREEN_MENU_UP_POSITION;
+}
+
+void showMenuDownPosition(){
+  displayMenu("Position basse");
+  currentScreen = SCREEN_MENU_DOWN_POSITION;
+}
+
+
 
 void handleButtonPressed(Button_t* button){
-  lcd.print("                   ");
-  lcd.setCursor(0, 1);
+  if( SCREEN_MAIN.equals(currentScreen) && button->label == "OK"){
+    showMenuTime();
+  }
+  else if(SCREEN_MENU_TIME.equals(currentScreen) && button->label == "DOWN"){
+    showMenuUpTime();
+  }
+  else if(SCREEN_MENU_UP_TIME.equals(currentScreen) && button->label == "DOWN"){
+    showMenuDownTime();
+  }
+  else if(SCREEN_MENU_DOWN_TIME.equals(currentScreen) && button->label == "DOWN"){
+    showMenuUpPosition();
+  }
+  else if(SCREEN_MENU_UP_POSITION.equals(currentScreen) && button->label == "DOWN"){
+    showMenuDownPosition();
+  }
+  else if(SCREEN_MENU_DOWN_POSITION.equals(currentScreen) && button->label == "DOWN"){
+    showMenuTime();
+  }
+  else if(SCREEN_MENU_TIME.equals(currentScreen) && button->label == "OK"){
+    displayMenu("TODO");
+  }
+  
+}
+
+
+
+
+void handleButtonChanged(Button_t* button){
   //lcd.print(button.label);
   //lcd.print(String(button->label + " HIGH"));
   if( button->state == HIGH){
-    lcd.print(String(button->label + " HIGH"));
+    handleButtonPressed(button);
   }
   else{
-    lcd.print(String(button->label + " LOW"));
+    
   }
   
 }
@@ -79,7 +150,7 @@ void refreshButtonsState(){
         button->state = newState;
       Serial.println(button->state);
       Serial.println("BBBB");
-      handleButtonPressed(button);
+      handleButtonChanged(button);
     }
   }
 }
@@ -106,6 +177,9 @@ void setup() {
   
   
 }                          
+
+
+
 
 
 
