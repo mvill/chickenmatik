@@ -66,27 +66,27 @@ void displayMenu( String menuItemLabel ){
 }
 
 void showMenuTime(){
-  displayMenu("Heure");
+  displayMenu("1-Heure");
   currentScreen = SCREEN_MENU_TIME;
 }
 
 void showMenuUpTime(){
-  displayMenu("Heure de lever");
+  displayMenu("2-Heure lever");
   currentScreen = SCREEN_MENU_UP_TIME;
 }
 
 void showMenuDownTime(){
-  displayMenu("Heure de coucher");
+  displayMenu("3-Heure coucher");
   currentScreen = SCREEN_MENU_DOWN_TIME;
 }
 
 void showMenuUpPosition(){
-  displayMenu("Position haute");
+  displayMenu("4-Position haute");
   currentScreen = SCREEN_MENU_UP_POSITION;
 }
 
 void showMenuDownPosition(){
-  displayMenu("Position basse");
+  displayMenu("5-Position basse");
   currentScreen = SCREEN_MENU_DOWN_POSITION;
 }
 
