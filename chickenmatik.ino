@@ -1,5 +1,11 @@
 #include <LiquidCrystal.h>
+#include <Stepper.h>
 #include "menu.h"
+
+//Stepper
+int nombreDePas = 48*64;
+Stepper monMoteur(nombreDePas, A2, A4, A3, A1);
+
 
 const int LEFT_BUTTON_PIN = 6;
 const int DOWN_BUTTON_PIN = 7;
@@ -189,6 +195,7 @@ void setup() {
   // Print a message to the LCD.
   lcd.print("hello, world!");
   
+  monMoteur.setSpeed(9);
   
   
 }                          
@@ -247,6 +254,9 @@ void loopDisplayTime(){
 
 void loop() {
   
+  monMoteur.step(2000);
+  monMoteur.step(-2000);
+  
   
   int currentMs = millis();
   if( currentMs > lastLedLoopTime + LOOP_LED_INTERVAL ){
@@ -254,10 +264,11 @@ void loop() {
     loopLed();
   }
   
+  /*
   if( currentMs > lastDisplayTimeTime + LOOP_DISPLAY_TIME_INTERVAL ){
     lastDisplayTimeTime = currentMs;
     loopDisplayTime();
-  }
+  }*/
   
   
   
