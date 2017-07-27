@@ -56,6 +56,7 @@ const String SCREEN_MENU_UP_TIME = "MENU_UP_TIME";
 const String SCREEN_MENU_DOWN_TIME = "MENU_DOWN_TIME";
 const String SCREEN_MENU_UP_POSITION = "MENU_UP_POSITION";
 const String SCREEN_MENU_DOWN_POSITION = "MENU_DOWN_POSITION";
+const String SCREEN_DO_UP_POSITION = "MENU_DO_UP_POSITION";
 
 String currentScreen = "MAIN_SCREEN";
 
@@ -96,6 +97,14 @@ void showMenuDownPosition(){
   currentScreen = SCREEN_MENU_DOWN_POSITION;
 }
 
+void displayMenuDoUpPosition(){
+    lcd.clear();
+    lcd.setCursor(0, 0);
+    lcd.print("Set up position");
+    lcd.setCursor(0, 1);
+    lcd.print("DO UP OR DOWN");
+  currentScreen = SCREEN_DO_UP_POSITION;
+}
 
 
 void handleButtonPressed(Button_t* button){
@@ -135,6 +144,11 @@ void handleButtonPressed(Button_t* button){
   else if(SCREEN_MENU_TIME.equals(currentScreen) && button->label == "OK"){
     displayMenu("TODO");
   }
+  else if(SCREEN_MENU_UP_POSITION.equals(currentScreen) && button->label == "OK"){
+    displayMenuDoUpPosition();
+  }
+  
+  
   
 }
 
@@ -254,8 +268,15 @@ void loopDisplayTime(){
 
 void loop() {
   
-  monMoteur.step(2000);
-  monMoteur.step(-2000);
+  //monMoteur.step(2000);
+  //monMoteur.step(-2000);
+  
+      if( currentScreen == SCREEN_DO_UP_POSITION && digitalRead(UP_BUTTON_PIN) == HIGH ){
+        monMoteur.step(20);
+      }
+      else if( currentScreen == SCREEN_DO_UP_POSITION && digitalRead(DOWN_BUTTON_PIN) == HIGH ){
+        monMoteur.step(-20);
+      }
   
   
   int currentMs = millis();
