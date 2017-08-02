@@ -56,8 +56,13 @@ const String SCREEN_MENU_UP_TIME = "MENU_UP_TIME";
 const String SCREEN_MENU_DOWN_TIME = "MENU_DOWN_TIME";
 const String SCREEN_MENU_UP_POSITION = "MENU_UP_POSITION";
 const String SCREEN_MENU_DOWN_POSITION = "MENU_DOWN_POSITION";
-const String SCREEN_DO_UP_POSITION = "MENU_DO_UP_POSITION";
-const String SCREEN_DO_DOWN_POSITION = "MENU_DO_DOWN_POSITION";
+const String SCREEN_DO_UP_POSITION = "DO_UP_POSITION";
+const String SCREEN_DO_DOWN_POSITION = "DO_DOWN_POSITION";
+const String SCREEN_DO_TIME_HOUR = "DO_TIME_HOUR";
+const String SCREEN_DO_TIME_MINUTE = "DO_TIME_HOUR";
+
+int inputHour;
+int inputMinute;
 
 String currentScreen = "MAIN_SCREEN";
 
@@ -191,9 +196,44 @@ void handleButtonPressed(Button_t* button){
     displayLcd("MENU", "4-Position haute");
     currentScreen = SCREEN_MENU_UP_POSITION;
   }
+  
+  //Reglage de l'heure
   else if(SCREEN_MENU_TIME.equals(currentScreen) && button->label == "OK"){
-    displayLcd("MENU", "TODO");
+    inputHour = 0;
+    inputMinute = 0;
+    displayLcd("TODO", "Saisie heure");
+    currentScreen = SCREEN_DO_TIME_HOUR;
   }
+  else if(SCREEN_DO_TIME_HOUR.equals(currentScreen) && button->label == "UP"){
+    inputHour = (inputHour + 1) % 24;
+  }
+  else if(SCREEN_DO_TIME_HOUR.equals(currentScreen) && button->label == "DOWN"){
+    inputHour = (inputHour - 1) % 24;
+  }
+  else if(SCREEN_DO_TIME_HOUR.equals(currentScreen) && button->label == "OK"){
+    displayLcd("TODO", "Saisie minute");
+    currentScreen = SCREEN_DO_TIME_MINUTE;
+  }
+  else if(SCREEN_DO_TIME_MINUTE.equals(currentScreen) && button->label == "UP"){
+    inputMinute = (inputMinute + 1) % 60;
+  }
+  else if(SCREEN_DO_TIME_MINUTE.equals(currentScreen) && button->label == "DOWN"){
+    inputMinute = (inputMinute - 1) % 60;
+  }
+  else if(SCREEN_DO_TIME_MINUTE.equals(currentScreen) && button->label == "OK"){
+    
+    //TODO enregistrer heure
+    displayLcd("TODO2", "Saisie minute fini");
+    
+    currentScreen = SCREEN_MAIN;
+  }
+  
+  
+  //Fin reglage de l'heure
+  
+  
+  
+  
   else if(SCREEN_MENU_UP_POSITION.equals(currentScreen) && button->label == "OK"){
     displayLcd("Set Up position","DO UP OR DOWN");
     currentScreen = SCREEN_DO_UP_POSITION;
