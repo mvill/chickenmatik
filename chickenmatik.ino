@@ -57,6 +57,7 @@ const String SCREEN_MENU_DOWN_TIME = "MENU_DOWN_TIME";
 const String SCREEN_MENU_UP_POSITION = "MENU_UP_POSITION";
 const String SCREEN_MENU_DOWN_POSITION = "MENU_DOWN_POSITION";
 const String SCREEN_DO_UP_POSITION = "MENU_DO_UP_POSITION";
+const String SCREEN_DO_DOWN_POSITION = "MENU_DO_DOWN_POSITION";
 
 String currentScreen = "MAIN_SCREEN";
 
@@ -64,88 +65,161 @@ String currentScreen = "MAIN_SCREEN";
 // initialize the library with the numbers of the interface pins
 LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
 
-void displayMenu( String menuItemLabel ){
+
+//STEP MANAGEMENT
+int currentPosition = 0;
+int upPosition = 0;
+int downPosition = 0;
+
+void step( int stepValue ){
+  currentPosition += stepValue;
+  monMoteur.step(stepValue);
+}
+
+void storeDownPosition(){
+  downPosition = currentPosition;
+}
+
+void storeUpPosition(){
+  upPosition = currentPosition;
+}
+
+void stepToDownPosition(){
+  step( downPosition - currentPosition );
+}
+
+void stepToUpPosition(){
+  step( upPosition - currentPosition );
+}
+//END STEP MANAGEMENT
+
+
+//TIME MANAGEMENT
+
+//24h en ms
+unsigned long ONE_DAY = 24l * 60l * 60l * 1000l;
+unsigned long ONE_HOUR = 60l * 60l * 1000l;
+unsigned long ONE_MINUTE = 60l * 1000l;
+unsigned long ONE_SECOND = 1000l;
+
+//ms depuis minuit
+unsigned long midnightTime = 0;
+
+//en ms depuis minuit
+unsigned long getTime(){
+  unsigned long now = millis();
+  unsigned long time = (now - midnightTime) % ONE_DAY;
+  return time;
+}
+
+void setTime( unsigned long time ){
+  //24h en ms = 24 * 60 * 60 * 1000
+  midnightTime = ( millis() - time + ONE_DAY) % ONE_DAY;
+}
+
+//Heure format HH:mm
+String getFullHourStr(){
+  unsigned long time = getTime();
+  unsigned long hours = ( time / ONE_HOUR ) % 24l;
+  unsigned long minutes = ( time / ONE_MINUTE ) % 60l;
+  unsigned long seconds = ( time / ONE_SECOND ) % 60l;
+  String hourStr = String(String(hours) + ":" + String(minutes)+ ":" + String(seconds));
+  return hourStr;
+}
+//END TIME MANAGEMENT
+
+
+
+void displayLcd( String line1, String line2 ){
     lcd.clear();
     lcd.setCursor(0, 0);
-    lcd.print("MENU");
+    lcd.print(line1);
     lcd.setCursor(0, 1);
-    lcd.print(menuItemLabel);
+    lcd.print(line2); 
 }
 
-void showMenuTime(){
-  displayMenu("1-Heure");
-  currentScreen = SCREEN_MENU_TIME;
-}
 
-void showMenuUpTime(){
-  displayMenu("2-Heure lever");
-  currentScreen = SCREEN_MENU_UP_TIME;
-}
-
-void showMenuDownTime(){
-  displayMenu("3-Heure coucher");
-  currentScreen = SCREEN_MENU_DOWN_TIME;
-}
-
-void showMenuUpPosition(){
-  displayMenu("4-Position haute");
-  currentScreen = SCREEN_MENU_UP_POSITION;
-}
-
-void showMenuDownPosition(){
-  displayMenu("5-Position basse");
-  currentScreen = SCREEN_MENU_DOWN_POSITION;
-}
-
-void displayMenuDoUpPosition(){
-    lcd.clear();
-    lcd.setCursor(0, 0);
-    lcd.print("Set up position");
-    lcd.setCursor(0, 1);
-    lcd.print("DO UP OR DOWN");
-  currentScreen = SCREEN_DO_UP_POSITION;
+void displayMainScreen(){
+  
+  displayLcd("ChickenMatic", "1-Heure");
 }
 
 
 void handleButtonPressed(Button_t* button){
+  
   if( SCREEN_MAIN.equals(currentScreen) && button->label == "OK"){
-    showMenuTime();
+    displayLcd("MENU", "1-Heure");
+    currentScreen = SCREEN_MENU_TIME;
   }
   else if(SCREEN_MENU_TIME.equals(currentScreen) && button->label == "DOWN"){
-    showMenuUpTime();
+    displayLcd("MENU", "2-Heure lever");
+    currentScreen = SCREEN_MENU_UP_TIME;
   }
   else if(SCREEN_MENU_TIME.equals(currentScreen) && button->label == "UP"){
-    showMenuDownPosition();
+    displayLcd("MENU", "5-Position basse");
+    currentScreen = SCREEN_MENU_DOWN_POSITION;
   }
   else if(SCREEN_MENU_UP_TIME.equals(currentScreen) && button->label == "DOWN"){
-    showMenuDownTime();
+    displayLcd("MENU", "3-Heure coucher");
+    currentScreen = SCREEN_MENU_DOWN_TIME;
   }
   else if(SCREEN_MENU_UP_TIME.equals(currentScreen) && button->label == "UP"){
-    showMenuTime();
+    displayLcd("MENU", "1-Heure");
+    currentScreen = SCREEN_MENU_TIME;
   }
   else if(SCREEN_MENU_DOWN_TIME.equals(currentScreen) && button->label == "DOWN"){
-    showMenuUpPosition();
+    displayLcd("MENU", "4-Position haute");
+    currentScreen = SCREEN_MENU_UP_POSITION;
   }
   else if(SCREEN_MENU_DOWN_TIME.equals(currentScreen) && button->label == "UP"){
-    showMenuUpTime();
+    displayLcd("MENU", "2-Heure lever");
+    currentScreen = SCREEN_MENU_UP_TIME;
   }
   else if(SCREEN_MENU_UP_POSITION.equals(currentScreen) && button->label == "DOWN"){
-    showMenuDownPosition();
+    displayLcd("MENU", "5-Position basse");
+    currentScreen = SCREEN_MENU_DOWN_POSITION;
   }
   else if(SCREEN_MENU_UP_POSITION.equals(currentScreen) && button->label == "UP"){
-    showMenuDownTime();
+    displayLcd("MENU", "3-Heure coucher");
+    currentScreen = SCREEN_MENU_DOWN_TIME;
   }
   else if(SCREEN_MENU_DOWN_POSITION.equals(currentScreen) && button->label == "DOWN"){
-    showMenuTime();
+    displayLcd("MENU", "1-Heure");
+    currentScreen = SCREEN_MENU_TIME;
   }
   else if(SCREEN_MENU_DOWN_POSITION.equals(currentScreen) && button->label == "UP"){
-    showMenuUpPosition();
+    displayLcd("MENU", "4-Position haute");
+    currentScreen = SCREEN_MENU_UP_POSITION;
   }
   else if(SCREEN_MENU_TIME.equals(currentScreen) && button->label == "OK"){
-    displayMenu("TODO");
+    displayLcd("MENU", "TODO");
   }
   else if(SCREEN_MENU_UP_POSITION.equals(currentScreen) && button->label == "OK"){
-    displayMenuDoUpPosition();
+    displayLcd("Set Up position","DO UP OR DOWN");
+    currentScreen = SCREEN_DO_UP_POSITION;
+  }
+  else if(SCREEN_MENU_DOWN_POSITION.equals(currentScreen) && button->label == "OK"){
+    displayLcd("Set Down position","DO UP OR DOWN");
+    currentScreen = SCREEN_DO_DOWN_POSITION;
+  }
+  //Enregistrement de la position haute
+  else if(SCREEN_DO_UP_POSITION.equals(currentScreen) && button->label == "OK"){
+    storeUpPosition();
+    displayLcd("MAIN SCREEN","");
+    currentScreen = SCREEN_MAIN;
+  }
+  //Enregistrement de la position basse
+  else if(SCREEN_DO_DOWN_POSITION.equals(currentScreen) && button->label == "OK"){
+    storeDownPosition();
+    displayLcd("MAIN SCREEN","");
+    currentScreen = SCREEN_MAIN;
+  }
+  //Ouverture manuelle de la porte
+  else if(SCREEN_MAIN.equals(currentScreen) && button->label == "UP"){
+    stepToUpPosition();
+  }
+  else if(SCREEN_MAIN.equals(currentScreen) && button->label == "DOWN"){
+    stepToDownPosition();
   }
   
   
@@ -222,7 +296,9 @@ void setup() {
 
 
 int lastLoopTime = 0;
+int lastTimeDisplayTime = 0;
 
+const int LOOP_TIME_DISPLAY_INTERVAL = 100;
 const int LOOP_LED_INTERVAL = 100;
 const int LED_CHANGE_INTERVAL = 1000;
 int lastLedLoopTime;
@@ -245,24 +321,10 @@ void loopLed(){
   
 }
 
-int lastDisplayTimeTime;
-const int LOOP_DISPLAY_TIME_INTERVAL = 100;
-
 void loopDisplayTime(){
-  
-  unsigned long currentMs = millis();
-  unsigned long allSeconds = currentMs/1000;
-  unsigned long seconds = allSeconds % 60;
-  unsigned long mins = allSeconds/60 % 60;
-  unsigned long hours = allSeconds/3600;
-  
-  
-    lcd.clear();
-    lcd.setCursor(0, 0);
-    lcd.print(String(String(allSeconds) + "ss"));
-    lcd.setCursor(0, 1);
-    lcd.print(String( String(hours) + "h" + String(mins) + "m" + String(seconds) + "s"));
-  
+  if(SCREEN_MAIN.equals(currentScreen)){
+    displayLcd( getFullHourStr(), "" );
+  }
 }
 
 
@@ -271,25 +333,28 @@ void loop() {
   //monMoteur.step(2000);
   //monMoteur.step(-2000);
   
-      if( currentScreen == SCREEN_DO_UP_POSITION && digitalRead(UP_BUTTON_PIN) == HIGH ){
-        monMoteur.step(20);
+  
+      if( ( currentScreen == SCREEN_DO_UP_POSITION || currentScreen == SCREEN_DO_DOWN_POSITION ) && digitalRead(UP_BUTTON_PIN) == HIGH ){
+        step(20);
       }
-      else if( currentScreen == SCREEN_DO_UP_POSITION && digitalRead(DOWN_BUTTON_PIN) == HIGH ){
-        monMoteur.step(-20);
+      else if( ( currentScreen == SCREEN_DO_UP_POSITION || currentScreen == SCREEN_DO_DOWN_POSITION ) && digitalRead(DOWN_BUTTON_PIN) == HIGH ){
+        step(-20);
       }
   
   
   int currentMs = millis();
+  
+  
   if( currentMs > lastLedLoopTime + LOOP_LED_INTERVAL ){
     lastLedLoopTime = currentMs;
     loopLed();
   }
   
-  /*
-  if( currentMs > lastDisplayTimeTime + LOOP_DISPLAY_TIME_INTERVAL ){
-    lastDisplayTimeTime = currentMs;
+  
+  if( currentMs > lastTimeDisplayTime + LOOP_TIME_DISPLAY_INTERVAL ){
+    lastTimeDisplayTime = currentMs;
     loopDisplayTime();
-  }*/
+  }
   
   
   
