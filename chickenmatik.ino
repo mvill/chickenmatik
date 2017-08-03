@@ -61,8 +61,8 @@ const String SCREEN_DO_DOWN_POSITION = "DO_DOWN_POSITION";
 const String SCREEN_DO_TIME_HOUR = "DO_TIME_HOUR";
 const String SCREEN_DO_TIME_MINUTE = "DO_TIME_MINUTE";
 
-int inputHour;
-int inputMinute;
+unsigned long inputHour;
+unsigned long inputMinute;
 
 String currentScreen = "MAIN_SCREEN";
 
@@ -109,17 +109,19 @@ unsigned long ONE_SECOND = 1000l;
 
 //ms depuis minuit
 unsigned long midnightTime = 0;
+unsigned long upTime = ONE_HOUR * 9l;
+unsigned long downTime = ONE_HOUR * 22.5l;
 
 //en ms depuis minuit
 unsigned long getTime(){
   unsigned long now = millis();
-  unsigned long time = (now - midnightTime) % ONE_DAY;
+  unsigned long time = (now + ONE_DAY - midnightTime) % ONE_DAY;
   return time;
 }
 
 void setTime( unsigned long time ){
   //24h en ms = 24 * 60 * 60 * 1000
-  midnightTime = ( millis() - time + ONE_DAY) % ONE_DAY;
+  midnightTime = ( millis() + ONE_DAY - time ) % ONE_DAY;
 }
 
 //Heure format HH:mm
@@ -199,32 +201,41 @@ void handleButtonPressed(Button_t* button){
   
   //Reglage de l'heure
   else if(SCREEN_MENU_TIME.equals(currentScreen) && button->label == "OK"){
-    inputHour = 0;
-    inputMinute = 0;
-    displayLcd("TODO", "Saisie heure");
+    //inputHour = ( getTime() / ONE_HOUR ) % ONE_HOUR ;
+    //inputMinute = ( getTime() / ONE_MINUTE ) % ONE_MINUTE ;
+    inputHour = 0l;
+    inputMinute = 0l ;
+    displayLcd("Saisie heure", String(inputHour) + ":" + String(inputMinute) );
     currentScreen = SCREEN_DO_TIME_HOUR;
   }
   else if(SCREEN_DO_TIME_HOUR.equals(currentScreen) && button->label == "UP"){
-    inputHour = (inputHour + 1) % 24;
+    inputHour = (inputHour + 1l) % 24l;
+    displayLcd("Saisie heure", String(inputHour) + ":" + String(inputMinute) );
   }
   else if(SCREEN_DO_TIME_HOUR.equals(currentScreen) && button->label == "DOWN"){
-    inputHour = (inputHour - 1) % 24;
+    if(inputHour == 0){ inputHour = 23; } else {inputHour--;}
+    displayLcd("Saisie heure", String(inputHour) + ":" + String(inputMinute) );
   }
   else if(SCREEN_DO_TIME_HOUR.equals(currentScreen) && button->label == "OK"){
-    displayLcd("TODO", "Saisie minute");
+    displayLcd("Saisie minute", String(inputHour) + ":" + String(inputMinute));
     currentScreen = SCREEN_DO_TIME_MINUTE;
   }
   else if(SCREEN_DO_TIME_MINUTE.equals(currentScreen) && button->label == "UP"){
-    inputMinute = (inputMinute + 1) % 60;
+    inputMinute = (inputMinute + 1l) % 60l;
+    displayLcd("Saisie minute", String(inputHour) + ":" + String(inputMinute));
   }
   else if(SCREEN_DO_TIME_MINUTE.equals(currentScreen) && button->label == "DOWN"){
-    inputMinute = (inputMinute - 1) % 60;
+    if(inputMinute == 0){ inputMinute = 59; } else {inputMinute--;}
+    displayLcd("Saisie minute", String(inputHour) + ":" + String(inputMinute));
   }
   else if(SCREEN_DO_TIME_MINUTE.equals(currentScreen) && button->label == "OK"){
     
     //TODO enregistrer heure
     displayLcd("TODO2", "Saisie minute fini");
     
+    unsigned long time = inputHour * ONE_HOUR + inputMinute * ONE_MINUTE;
+    displayLcd("TODO2", String(time));
+    setTime(time);
     currentScreen = SCREEN_MAIN;
   }
   
@@ -341,8 +352,23 @@ int lastTimeDisplayTime = 0;
 const int LOOP_TIME_DISPLAY_INTERVAL = 100;
 const int LOOP_LED_INTERVAL = 100;
 const int LED_CHANGE_INTERVAL = 1000;
-int lastLedLoopTime;
-int lastLedChangeTime;
+const int CHECK_HOUR_POSITION_INTERVAL = 3000;
+unsigned long lastLedLoopTime;
+unsigned long lastLedChangeTime;
+unsigned long lastCheckHourPosition;
+
+
+
+void loopCheckHourPosition(){
+  if( getTime() > downTime && currentPosition != downPosition ){
+    stepToDownPosition();
+  }
+  else if( getTime() > upTime && currentPosition != upPosition ){
+    stepToUpPosition();
+  }
+}
+
+
 int ledState = LOW;
 
 void loopLed(){
@@ -396,6 +422,10 @@ void loop() {
     loopDisplayTime();
   }
   
+  if( currentMs > lastCheckHourPosition + CHECK_HOUR_POSITION_INTERVAL ){
+    lastCheckHourPosition = currentMs;
+    loopCheckHourPosition();
+  }
   
   
   
