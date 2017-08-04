@@ -72,11 +72,11 @@ LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
 
 
 //STEP MANAGEMENT
-int currentPosition = 0;
-int upPosition = 0;
-int downPosition = 0;
+long currentPosition = 0;
+long upPosition = 0;
+long downPosition = 0;
 
-void step( int stepValue ){
+void step( long stepValue ){
   currentPosition += stepValue;
   monMoteur.step(stepValue);
 }
@@ -256,14 +256,14 @@ void handleButtonPressed(Button_t* button){
   //Enregistrement de la position haute
   else if(SCREEN_DO_UP_POSITION.equals(currentScreen) && button->label == "OK"){
     storeUpPosition();
-    displayLcd("MAIN SCREEN","");
-    currentScreen = SCREEN_MAIN;
+    displayLcd("MENU","4-Position haute");
+    currentScreen = SCREEN_MENU_UP_POSITION;
   }
   //Enregistrement de la position basse
   else if(SCREEN_DO_DOWN_POSITION.equals(currentScreen) && button->label == "OK"){
     storeDownPosition();
-    displayLcd("MAIN SCREEN","");
-    currentScreen = SCREEN_MAIN;
+    displayLcd("MENU", "5-Position basse");
+    currentScreen = SCREEN_MENU_DOWN_POSITION;
   }
   //Ouverture manuelle de la porte
   else if(SCREEN_MAIN.equals(currentScreen) && button->label == "UP"){
@@ -360,12 +360,24 @@ unsigned long lastCheckHourPosition;
 
 
 void loopCheckHourPosition(){
-  if( getTime() > downTime && currentPosition != downPosition ){
-    stepToDownPosition();
+  if( SCREEN_MAIN.equals(currentScreen) ){
+    unsigned long time = getTime();
+    if(time > downTime){
+      if( currentPosition != downPosition ){
+        stepToDownPosition();
+      }
+    }
+    else if( time > upTime && currentPosition != upPosition ){
+      stepToUpPosition();
+    }
   }
-  else if( getTime() > upTime && currentPosition != upPosition ){
-    stepToUpPosition();
-  }
+  
+  //if( getTime() > downTime && currentPosition != downPosition ){
+  //  stepToDownPosition();
+  //}
+  //else if( getTime() > upTime && getTime() < downTime && currentPosition != upPosition ){
+  //  stepToUpPosition();
+  //}
 }
 
 
