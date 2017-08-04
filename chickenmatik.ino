@@ -109,8 +109,8 @@ unsigned long ONE_SECOND = 1000l;
 
 //ms depuis minuit
 unsigned long midnightTime = 0;
-unsigned long upTime = ONE_HOUR * 9l;
-unsigned long downTime = ONE_HOUR * 22.5l;
+unsigned long upTime = ONE_HOUR * 7l;
+unsigned long downTime = ONE_HOUR * 22l;
 
 //en ms depuis minuit
 unsigned long getTime(){
@@ -201,10 +201,10 @@ void handleButtonPressed(Button_t* button){
   
   //Reglage de l'heure
   else if(SCREEN_MENU_TIME.equals(currentScreen) && button->label == "OK"){
-    //inputHour = ( getTime() / ONE_HOUR ) % ONE_HOUR ;
-    //inputMinute = ( getTime() / ONE_MINUTE ) % ONE_MINUTE ;
-    inputHour = 0l;
-    inputMinute = 0l ;
+    inputHour = ( getTime() / ONE_HOUR ) % 24 ;
+    inputMinute = ( getTime() / ONE_MINUTE ) % 60 ;
+    //inputHour = 0l;
+    //inputMinute = 0l ;
     displayLcd("Saisie heure", String(inputHour) + ":" + String(inputMinute) );
     currentScreen = SCREEN_DO_TIME_HOUR;
   }
