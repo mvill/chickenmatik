@@ -4,7 +4,7 @@
 
 //Stepper
 int nombreDePas = 48*64;
-Stepper monMoteur(nombreDePas, A2, A4, A3, A1);
+Stepper monMoteur(nombreDePas, A1, A3, A2, A0);
 
 
 const int LEFT_BUTTON_PIN = 6;
