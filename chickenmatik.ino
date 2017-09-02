@@ -1,11 +1,14 @@
+#include <Arduino.h>
 #include <LiquidCrystal.h>
 #include <Stepper.h>
+#include <RTClib.h>
 #include "menu.h"
 
 //Stepper
 int nombreDePas = 48*64;
 Stepper monMoteur(nombreDePas, A1, A3, A2, A0);
 
+RTC_DS1307 rtc;
 
 const int LEFT_BUTTON_PIN = 6;
 const int DOWN_BUTTON_PIN = 7;
@@ -319,6 +322,19 @@ void setup() {
 
   Serial.begin(9600);
 
+
+  if (! rtc.begin()) {
+    Serial.println("Couldn't find RTC");
+    while (1);
+  }
+
+  if (! rtc.isrunning()) {
+    Serial.println("RTC is NOT running!");
+    while (1);
+  }
+  //rtc.adjust(DateTime(2017, 9, 2, 20, 00, 00));
+
+
   pinMode(LEFT_BUTTON_PIN, INPUT);
   pinMode(DOWN_BUTTON_PIN, INPUT);
   pinMode(UP_BUTTON_PIN, INPUT);
@@ -407,6 +423,28 @@ void loopDisplayTime(){
 
 
 void loop() {
+
+
+
+	//test RTC
+
+    DateTime now = rtc.now();
+
+    Serial.print(now.year(), DEC);
+    Serial.print('/');
+    Serial.print(now.month(), DEC);
+    Serial.print('/');
+    Serial.print(now.day(), DEC);
+    Serial.print(" ");
+    Serial.print(now.hour(), DEC);
+    Serial.print(':');
+    Serial.print(now.minute(), DEC);
+    Serial.print(':');
+    Serial.print(now.second(), DEC);
+    Serial.println();
+
+
+
 
   //monMoteur.step(2000);
   //monMoteur.step(-2000);

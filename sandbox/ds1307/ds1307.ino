@@ -1,6 +1,6 @@
 // Date and time functions using a DS1307 RTC connected via I2C and Wire lib
 #include <Wire.h>
-#include "RTClib.h"
+#include <RTClib.h>
 
 #if defined(ARDUINO_ARCH_SAMD)
 // for Zero, output on USB Serial console, remove line below if using programming port to program the Zero!
