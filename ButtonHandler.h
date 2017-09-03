@@ -17,16 +17,12 @@ public:
 
 	//Methods
 	virtual void handleButtonChanged(bool state){
-		Serial.println("ButtonHandler.handleButtonChanged");
 		//Nothing by default
 	}
 	virtual void handleButtonPressed(){
-
-		Serial.println("ButtonHandler.handleButtonPressed");
 		//Nothing by default
 	}
 	virtual void handleButtonReleased(){
-		Serial.println("ButtonHandler.handleButtonReleased");
 		//Nothing by default
 	}
 	virtual bool mustCheck(){

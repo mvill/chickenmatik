@@ -39,7 +39,6 @@ public:
 
 	}
 	void manage(){
-
 		int nbButtons = buttonWrappers.size();
 		for(int i = 0; i < nbButtons; i++) {
 			ButtonWrapper *currentButtonWrapper = buttonWrappers.get(i);
@@ -55,6 +54,10 @@ public:
 				for( int j = 0 ; j < nbHandlers ; j++ ){
 
 					ButtonHandler *handler = currentButtonWrapper->handlers.get(j);
+
+					Serial.println("HEY1");
+					Serial.println(currentButtonWrapper->handlers.size());
+					Serial.println("HEY2");
 
 					if( handler->mustCheck() ){
 						handler->handleButtonChanged(newState);
