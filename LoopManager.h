@@ -32,4 +32,4 @@ public:
 	void loop();
 };
 
-#endif LoopManager_h
+#endif

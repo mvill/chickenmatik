@@ -5,6 +5,9 @@
 #include "timeHandler.h"
 #include "menu.h"
 #include "LoopManager.h"
+#include "ButtonsManager.h"
+#include "ButtonHandler.h"
+#include "ClassicButton.h"
 
 TimeHandler timeHandler;
 
@@ -369,6 +372,34 @@ public:
 };
 
 
+Button *leftButtonBis = new ClassicButton("LEFT", LEFT_BUTTON_PIN );
+Button *downButtonBis = new ClassicButton("DOWN", DOWN_BUTTON_PIN );
+Button *upButtonBis = new ClassicButton("UP", UP_BUTTON_PIN );
+Button *rightButtonBis = new ClassicButton("RIGHT", RIGHT_BUTTON_PIN );
+Button *okButtonBis = new ClassicButton("OK", OK_BUTTON_PIN );
+
+class TestButtonHandler : public ButtonHandler{
+public:
+	TestButtonHandler(Button *button): ButtonHandler(button){}
+	void handleButtonPressed(){
+		Serial.println(String(this->button->label + String(" pressed")));
+	}
+	void handleButtonReleased(){
+		Serial.println(String(this->button->label + String(" released")));
+	}
+};
+
+
+ButtonsManager *buttonsManager = new ButtonsManager();
+
+
+class ButtonsLooper: public Looper {
+public:
+	void doLoop(){
+		buttonsManager->manage();
+	}
+};
+
 LoopManager loopManager;
 void setup() {
 
@@ -376,9 +407,26 @@ void setup() {
 
 	SayAaaLooper *sayAaaLooper = new SayAaaLooper();
 	SayBbbLooper *sayBbbLooper = new SayBbbLooper();
+	ButtonsLooper *buttonsLooper = new ButtonsLooper();
 
-	loopManager.addLooper(sayAaaLooper, 1000);
-	loopManager.addLooper(sayBbbLooper, 3001);
+//	loopManager.addLooper(sayAaaLooper, 1000);
+//	loopManager.addLooper(sayBbbLooper, 3001);
+	loopManager.addLooper(buttonsLooper, 50);
+
+
+
+	  pinMode(LEFT_BUTTON_PIN, INPUT);
+	  pinMode(DOWN_BUTTON_PIN, INPUT);
+	  pinMode(UP_BUTTON_PIN, INPUT);
+	  pinMode(RIGHT_BUTTON_PIN, INPUT);
+	  pinMode(OK_BUTTON_PIN, INPUT);
+
+	  buttonsManager->addButtonHandler(new TestButtonHandler(leftButtonBis));
+	  buttonsManager->addButtonHandler(new TestButtonHandler(downButtonBis));
+	  buttonsManager->addButtonHandler(new TestButtonHandler(upButtonBis));
+	  buttonsManager->addButtonHandler(new TestButtonHandler(rightButtonBis));
+	  buttonsManager->addButtonHandler(new TestButtonHandler(okButtonBis));
+
 }
 
 
@@ -542,6 +590,8 @@ void loopDisplayTime(){
 
 
 void loop() {
+
+//	Serial.println("loop");
 
 	loopManager.loop();
 }
