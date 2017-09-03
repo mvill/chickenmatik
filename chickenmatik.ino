@@ -3,7 +3,6 @@
 #include <RTClib.h>
 #include <Stepper.h>
 #include "timeHandler.h"
-#include "menu.h"
 #include "LoopManager.h"
 #include "ButtonsManager.h"
 #include "ButtonHandler.h"
@@ -26,53 +25,21 @@ const int LED_PIN = A0;
 const int NB_BUTTONS = 5;
 
 
-Button_t downButton = {
-      DOWN_BUTTON_PIN,
-      "DOWN",
-      LOW
-    };
-Button_t leftButton = {
-      LEFT_BUTTON_PIN,
-      "LEFT",
-      LOW
-    };
-Button_t upButton = {
-      UP_BUTTON_PIN,
-      "UP",
-      LOW
-    };
-Button_t rightButton = {
-      RIGHT_BUTTON_PIN,
-      "RIGHT",
-      LOW
-    };
-Button_t okButton = {
-      OK_BUTTON_PIN,
-      "OK",
-      LOW
-    };
 
-Button_t buttons[NB_BUTTONS] = {downButton, leftButton, upButton, rightButton, okButton};
+enum State {
+	SCREEN_MAIN,
+	SCREEN_MENU,
+	SCREEN_DO_UP_POSITION,
+	SCREEN_DO_DOWN_POSITION,
+	SCREEN_DO_TIME_HOUR,
+	SCREEN_DO_TIME_MINUTE
+};
+State currentState = SCREEN_MAIN;
 
-
-
-
-//TODO make enum
-const String SCREEN_MAIN = "MAIN_SCREEN";
-const String SCREEN_MENU_TIME = "MENU_TIME";
-const String SCREEN_MENU_UP_TIME = "MENU_UP_TIME";
-const String SCREEN_MENU_DOWN_TIME = "MENU_DOWN_TIME";
-const String SCREEN_MENU_UP_POSITION = "MENU_UP_POSITION";
-const String SCREEN_MENU_DOWN_POSITION = "MENU_DOWN_POSITION";
-const String SCREEN_DO_UP_POSITION = "DO_UP_POSITION";
-const String SCREEN_DO_DOWN_POSITION = "DO_DOWN_POSITION";
-const String SCREEN_DO_TIME_HOUR = "DO_TIME_HOUR";
-const String SCREEN_DO_TIME_MINUTE = "DO_TIME_MINUTE";
 
 unsigned long inputHour;
 unsigned long inputMinute;
 
-String currentScreen = "MAIN_SCREEN";
 
 
 // initialize the library with the numbers of the interface pins
@@ -160,168 +127,255 @@ void displayMainScreen(){
 }
 
 
-void handleButtonPressed(Button_t* button){
+class Executable{
+	void virtual execute(){
 
-  if( SCREEN_MAIN.equals(currentScreen) && button->label == "OK"){
-    displayLcd("MENU", "1-Heure");
-    currentScreen = SCREEN_MENU_TIME;
-  }
-  else if(SCREEN_MENU_TIME.equals(currentScreen) && button->label == "DOWN"){
-    displayLcd("MENU", "2-Heure lever");
-    currentScreen = SCREEN_MENU_UP_TIME;
-  }
-  else if(SCREEN_MENU_TIME.equals(currentScreen) && button->label == "UP"){
-    displayLcd("MENU", "5-Position basse");
-    currentScreen = SCREEN_MENU_DOWN_POSITION;
-  }
-  else if(SCREEN_MENU_UP_TIME.equals(currentScreen) && button->label == "DOWN"){
-    displayLcd("MENU", "3-Heure coucher");
-    currentScreen = SCREEN_MENU_DOWN_TIME;
-  }
-  else if(SCREEN_MENU_UP_TIME.equals(currentScreen) && button->label == "UP"){
-    displayLcd("MENU", "1-Heure");
-    currentScreen = SCREEN_MENU_TIME;
-  }
-  else if(SCREEN_MENU_DOWN_TIME.equals(currentScreen) && button->label == "DOWN"){
-    displayLcd("MENU", "4-Position haute");
-    currentScreen = SCREEN_MENU_UP_POSITION;
-  }
-  else if(SCREEN_MENU_DOWN_TIME.equals(currentScreen) && button->label == "UP"){
-    displayLcd("MENU", "2-Heure lever");
-    currentScreen = SCREEN_MENU_UP_TIME;
-  }
-  else if(SCREEN_MENU_UP_POSITION.equals(currentScreen) && button->label == "DOWN"){
-    displayLcd("MENU", "5-Position basse");
-    currentScreen = SCREEN_MENU_DOWN_POSITION;
-  }
-  else if(SCREEN_MENU_UP_POSITION.equals(currentScreen) && button->label == "UP"){
-    displayLcd("MENU", "3-Heure coucher");
-    currentScreen = SCREEN_MENU_DOWN_TIME;
-  }
-  else if(SCREEN_MENU_DOWN_POSITION.equals(currentScreen) && button->label == "DOWN"){
-    displayLcd("MENU", "1-Heure");
-    currentScreen = SCREEN_MENU_TIME;
-  }
-  else if(SCREEN_MENU_DOWN_POSITION.equals(currentScreen) && button->label == "UP"){
-    displayLcd("MENU", "4-Position haute");
-    currentScreen = SCREEN_MENU_UP_POSITION;
-  }
-
-  //Reglage de l'heure
-  else if(SCREEN_MENU_TIME.equals(currentScreen) && button->label == "OK"){
-    inputHour = ( getTime() / ONE_HOUR ) % 24 ;
-    inputMinute = ( getTime() / ONE_MINUTE ) % 60 ;
-    //inputHour = 0l;
-    //inputMinute = 0l ;
-    displayLcd("Saisie heure", String(inputHour) + ":" + String(inputMinute) );
-    currentScreen = SCREEN_DO_TIME_HOUR;
-  }
-  else if(SCREEN_DO_TIME_HOUR.equals(currentScreen) && button->label == "UP"){
-    inputHour = (inputHour + 1l) % 24l;
-    displayLcd("Saisie heure", String(inputHour) + ":" + String(inputMinute) );
-  }
-  else if(SCREEN_DO_TIME_HOUR.equals(currentScreen) && button->label == "DOWN"){
-    if(inputHour == 0){ inputHour = 23; } else {inputHour--;}
-    displayLcd("Saisie heure", String(inputHour) + ":" + String(inputMinute) );
-  }
-  else if(SCREEN_DO_TIME_HOUR.equals(currentScreen) && button->label == "OK"){
-    displayLcd("Saisie minute", String(inputHour) + ":" + String(inputMinute));
-    currentScreen = SCREEN_DO_TIME_MINUTE;
-  }
-  else if(SCREEN_DO_TIME_MINUTE.equals(currentScreen) && button->label == "UP"){
-    inputMinute = (inputMinute + 1l) % 60l;
-    displayLcd("Saisie minute", String(inputHour) + ":" + String(inputMinute));
-  }
-  else if(SCREEN_DO_TIME_MINUTE.equals(currentScreen) && button->label == "DOWN"){
-    if(inputMinute == 0){ inputMinute = 59; } else {inputMinute--;}
-    displayLcd("Saisie minute", String(inputHour) + ":" + String(inputMinute));
-  }
-  else if(SCREEN_DO_TIME_MINUTE.equals(currentScreen) && button->label == "OK"){
-
-    //TODO enregistrer heure
-    displayLcd("TODO2", "Saisie minute fini");
-
-    unsigned long time = inputHour * ONE_HOUR + inputMinute * ONE_MINUTE;
-    displayLcd("TODO2", String(time));
-    setTime(time);
-    currentScreen = SCREEN_MAIN;
-  }
+	}
+};
 
 
-  //Fin reglage de l'heure
+class MenuItem{
+public:
+	String label;
+	Executable *handler;
+	MenuItem( String label, Executable *handler ){
+		this->label = label;
+		this->handler = handler;
+	}
+};
 
+class Menu{
+public:
+	LinkedList<MenuItem*> items = LinkedList<MenuItem*>();
+	void addItem(MenuItem *item){
+		items.add(item);
+	}
+};
 
+class MenuBackButtonHandler : public ButtonHandler{
+private:
+	State initialState;
+	State menuState;
+public:
+	MenuBackButtonHandler( Button *button, State initialState, State menuState ) : ButtonHandler(button){
+		this->initialState = initialState;
+		this->menuState = menuState;
+	}
 
+	bool mustCheck(){
+		Serial.println("MenuBackButtonHandler.mustCheck1");
+		Serial.println(currentState);
+		Serial.println(menuState);
+		Serial.println("MenuBackButtonHandler.mustCheck2");
+		return currentState == menuState;
+	}
+	void handleButtonPressed(){
+		Serial.println("MenuBackButtonHandler.handleButtonPressed");
+		currentState = initialState;
+	}
+};
 
-  else if(SCREEN_MENU_UP_POSITION.equals(currentScreen) && button->label == "OK"){
-    displayLcd("Set Up position","DO UP OR DOWN");
-    currentScreen = SCREEN_DO_UP_POSITION;
-  }
-  else if(SCREEN_MENU_DOWN_POSITION.equals(currentScreen) && button->label == "OK"){
-    displayLcd("Set Down position","DO UP OR DOWN");
-    currentScreen = SCREEN_DO_DOWN_POSITION;
-  }
-  //Enregistrement de la position haute
-  else if(SCREEN_DO_UP_POSITION.equals(currentScreen) && button->label == "OK"){
-    storeUpPosition();
-    displayLcd("MENU","4-Position haute");
-    currentScreen = SCREEN_MENU_UP_POSITION;
-  }
-  //Enregistrement de la position basse
-  else if(SCREEN_DO_DOWN_POSITION.equals(currentScreen) && button->label == "OK"){
-    storeDownPosition();
-    displayLcd("MENU", "5-Position basse");
-    currentScreen = SCREEN_MENU_DOWN_POSITION;
-  }
-  //Ouverture manuelle de la porte
-  else if(SCREEN_MAIN.equals(currentScreen) && button->label == "UP"){
-    stepToUpPosition();
-  }
-  else if(SCREEN_MAIN.equals(currentScreen) && button->label == "DOWN"){
-    stepToDownPosition();
-  }
+class MenuShowButtonHandler : public ButtonHandler{
+private:
+	State initialState;
+	State menuState;
+public:
+	MenuShowButtonHandler( Button *button, State initialState, State menuState ) : ButtonHandler(button){
+		this->initialState = initialState;
+		this->menuState = menuState;
+	}
 
+	bool mustCheck(){
+		return currentState == initialState;
+	}
+	void handleButtonPressed(){
+		currentState = menuState;
+	    displayLcd("MENU", "1-Heure");
+	}
+};
 
+class MenuButtonHandlersGenerator{
+private:
+	Menu *menu;
+	State initialState;
+	State menuState;
+	Button *okButton;
+	Button *backButton;
+	Button *previousButton;
+	Button *nextButton;
+//	MenuItem getPreviousItem( int currentItemIndex ){
+//		int neededIndex = currentItemIndex - 1;
+//		//TODO do it with modulos
+//		if( neededIndex < 0 ){
+//			neededIndex = neededIndex + menu->items.size();
+//		}
+//		return menu->items.get(neededIndex);
+//	}
+//	MenuItem getNextItem( int currentItemIndex ){
+//		int neededIndex = currentItemIndex + 1;
+//		//TODO do it with modulos
+//		if( neededIndex >=  menu->items.size() ){
+//			neededIndex = neededIndex - menu->items.size();
+//		}
+//		return menu->items.get(neededIndex);
+//	}
 
-}
+public:
+	MenuButtonHandlersGenerator( Menu *menu, State initialState, State menuState, Button *okButton, Button *backButton, Button *previousButton, Button *nextButton){
+		this->menu = menu;
+		this->initialState = initialState;
+		this->menuState = menuState;
+		this->okButton = okButton;
+		this->backButton = backButton;
+		this->previousButton = previousButton;
+		this->nextButton = nextButton;
+	}
+	LinkedList<ButtonHandler*> generateButtonHandlers(){
+		LinkedList<ButtonHandler*> buttonHandlers = LinkedList<ButtonHandler*>();
+
+		// Back to main screen
+		MenuBackButtonHandler *menuBackButtonHandler = new MenuBackButtonHandler(backButton, initialState, menuState);
+		buttonHandlers.add(menuBackButtonHandler);
+
+		MenuShowButtonHandler *menuShowButtonHandler = new MenuShowButtonHandler(okButton, initialState, menuState);
+		buttonHandlers.add(menuShowButtonHandler);
+
+		int nbItems = menu->items.size();
+		for( int i = 0 ; i < nbItems ; i++ ){
+
+		}
+
+		Serial.println(String(buttonHandlers.size()));
+		return buttonHandlers;
+	}
+};
 
 
 
-
-void handleButtonChanged(Button_t* button){
-  //lcd.print(button.label);
-  //lcd.print(String(button->label + " HIGH"));
-  if( button->state == HIGH){
-    handleButtonPressed(button);
-  }
-  else{
-
-  }
-
-}
-
-
-void refreshButtonsState(){
-
-//      Serial.println(String(" si zeo f(buttons) : " + sizeof(buttons)));
-      //Serial.println(sizeof(buttons));
-
-  for (int i = 0; i < NB_BUTTONS; i++) {
-    Button_t* button = &buttons[i];
-    int newState = digitalRead(button->pin);
-    if( newState !=  button->state){
-
-      Serial.println("AAAA");
-      //Serial.println(button.label);
-      Serial.println(button->state);
-      //Serial.println(String(newState));
-        button->state = newState;
-      Serial.println(button->state);
-      Serial.println("BBBB");
-      handleButtonChanged(button);
-    }
-  }
-}
+//void handleButtonPressed(Button_t* button){
+//
+//  if( SCREEN_MAIN.equals(currentScreen) && button->label == "OK"){
+//    displayLcd("MENU", "1-Heure");
+//    currentScreen = SCREEN_MENU_TIME;
+//  }
+//  else if(SCREEN_MENU_TIME.equals(currentScreen) && button->label == "DOWN"){
+//    displayLcd("MENU", "2-Heure lever");
+//    currentScreen = SCREEN_MENU_UP_TIME;
+//  }
+//  else if(SCREEN_MENU_TIME.equals(currentScreen) && button->label == "UP"){
+//    displayLcd("MENU", "5-Position basse");
+//    currentScreen = SCREEN_MENU_DOWN_POSITION;
+//  }
+//  else if(SCREEN_MENU_UP_TIME.equals(currentScreen) && button->label == "DOWN"){
+//    displayLcd("MENU", "3-Heure coucher");
+//    currentScreen = SCREEN_MENU_DOWN_TIME;
+//  }
+//  else if(SCREEN_MENU_UP_TIME.equals(currentScreen) && button->label == "UP"){
+//    displayLcd("MENU", "1-Heure");
+//    currentScreen = SCREEN_MENU_TIME;
+//  }
+//  else if(SCREEN_MENU_DOWN_TIME.equals(currentScreen) && button->label == "DOWN"){
+//    displayLcd("MENU", "4-Position haute");
+//    currentScreen = SCREEN_MENU_UP_POSITION;
+//  }
+//  else if(SCREEN_MENU_DOWN_TIME.equals(currentScreen) && button->label == "UP"){
+//    displayLcd("MENU", "2-Heure lever");
+//    currentScreen = SCREEN_MENU_UP_TIME;
+//  }
+//  else if(SCREEN_MENU_UP_POSITION.equals(currentScreen) && button->label == "DOWN"){
+//    displayLcd("MENU", "5-Position basse");
+//    currentScreen = SCREEN_MENU_DOWN_POSITION;
+//  }
+//  else if(SCREEN_MENU_UP_POSITION.equals(currentScreen) && button->label == "UP"){
+//    displayLcd("MENU", "3-Heure coucher");
+//    currentScreen = SCREEN_MENU_DOWN_TIME;
+//  }
+//  else if(SCREEN_MENU_DOWN_POSITION.equals(currentScreen) && button->label == "DOWN"){
+//    displayLcd("MENU", "1-Heure");
+//    currentScreen = SCREEN_MENU_TIME;
+//  }
+//  else if(SCREEN_MENU_DOWN_POSITION.equals(currentScreen) && button->label == "UP"){
+//    displayLcd("MENU", "4-Position haute");
+//    currentScreen = SCREEN_MENU_UP_POSITION;
+//  }
+//
+//  //Reglage de l'heure
+//  else if(SCREEN_MENU_TIME.equals(currentScreen) && button->label == "OK"){
+//    inputHour = ( getTime() / ONE_HOUR ) % 24 ;
+//    inputMinute = ( getTime() / ONE_MINUTE ) % 60 ;
+//    //inputHour = 0l;
+//    //inputMinute = 0l ;
+//    displayLcd("Saisie heure", String(inputHour) + ":" + String(inputMinute) );
+//    currentScreen = SCREEN_DO_TIME_HOUR;
+//  }
+//  else if(SCREEN_DO_TIME_HOUR.equals(currentScreen) && button->label == "UP"){
+//    inputHour = (inputHour + 1l) % 24l;
+//    displayLcd("Saisie heure", String(inputHour) + ":" + String(inputMinute) );
+//  }
+//  else if(SCREEN_DO_TIME_HOUR.equals(currentScreen) && button->label == "DOWN"){
+//    if(inputHour == 0){ inputHour = 23; } else {inputHour--;}
+//    displayLcd("Saisie heure", String(inputHour) + ":" + String(inputMinute) );
+//  }
+//  else if(SCREEN_DO_TIME_HOUR.equals(currentScreen) && button->label == "OK"){
+//    displayLcd("Saisie minute", String(inputHour) + ":" + String(inputMinute));
+//    currentScreen = SCREEN_DO_TIME_MINUTE;
+//  }
+//  else if(SCREEN_DO_TIME_MINUTE.equals(currentScreen) && button->label == "UP"){
+//    inputMinute = (inputMinute + 1l) % 60l;
+//    displayLcd("Saisie minute", String(inputHour) + ":" + String(inputMinute));
+//  }
+//  else if(SCREEN_DO_TIME_MINUTE.equals(currentScreen) && button->label == "DOWN"){
+//    if(inputMinute == 0){ inputMinute = 59; } else {inputMinute--;}
+//    displayLcd("Saisie minute", String(inputHour) + ":" + String(inputMinute));
+//  }
+//  else if(SCREEN_DO_TIME_MINUTE.equals(currentScreen) && button->label == "OK"){
+//
+//    //TODO enregistrer heure
+//    displayLcd("TODO2", "Saisie minute fini");
+//
+//    unsigned long time = inputHour * ONE_HOUR + inputMinute * ONE_MINUTE;
+//    displayLcd("TODO2", String(time));
+//    setTime(time);
+//    currentScreen = SCREEN_MAIN;
+//  }
+//
+//
+//  //Fin reglage de l'heure
+//
+//
+//
+//
+//  else if(SCREEN_MENU_UP_POSITION.equals(currentScreen) && button->label == "OK"){
+//    displayLcd("Set Up position","DO UP OR DOWN");
+//    currentScreen = SCREEN_DO_UP_POSITION;
+//  }
+//  else if(SCREEN_MENU_DOWN_POSITION.equals(currentScreen) && button->label == "OK"){
+//    displayLcd("Set Down position","DO UP OR DOWN");
+//    currentScreen = SCREEN_DO_DOWN_POSITION;
+//  }
+//  //Enregistrement de la position haute
+//  else if(SCREEN_DO_UP_POSITION.equals(currentScreen) && button->label == "OK"){
+//    storeUpPosition();
+//    displayLcd("MENU","4-Position haute");
+//    currentScreen = SCREEN_MENU_UP_POSITION;
+//  }
+//  //Enregistrement de la position basse
+//  else if(SCREEN_DO_DOWN_POSITION.equals(currentScreen) && button->label == "OK"){
+//    storeDownPosition();
+//    displayLcd("MENU", "5-Position basse");
+//    currentScreen = SCREEN_MENU_DOWN_POSITION;
+//  }
+//  //Ouverture manuelle de la porte
+//  else if(SCREEN_MAIN.equals(currentScreen) && button->label == "UP"){
+//    stepToUpPosition();
+//  }
+//  else if(SCREEN_MAIN.equals(currentScreen) && button->label == "DOWN"){
+//    stepToDownPosition();
+//  }
+//
+//
+//
+//}
 
 //void setup() {
 //
@@ -400,18 +454,45 @@ public:
 	}
 };
 
+class TimeDisplayLooper: public Looper {
+public:
+	void doLoop(){
+		  if(SCREEN_MAIN == currentState){
+		    displayLcd( getFullHourStr(), "" );
+		  }
+	}
+};
+
 LoopManager loopManager;
 void setup() {
 
 	Serial.begin(9600);
 
+
+
+
+
+	  // set up the LCD's number of columns and rows:
+	  lcd.begin(16, 2);
+	  // Print a message to the LCD.
+//	  lcd.print("hello, world!");
+
+	    displayLcd("hello, world 1 !", "hello, world 2 !");
+
+
+
+
 	SayAaaLooper *sayAaaLooper = new SayAaaLooper();
 	SayBbbLooper *sayBbbLooper = new SayBbbLooper();
 	ButtonsLooper *buttonsLooper = new ButtonsLooper();
+	TimeDisplayLooper *timeDisplayLooper = new TimeDisplayLooper();
 
 //	loopManager.addLooper(sayAaaLooper, 1000);
 //	loopManager.addLooper(sayBbbLooper, 3001);
 	loopManager.addLooper(buttonsLooper, 50);
+	loopManager.addLooper(timeDisplayLooper, 1);
+
+
 
 
 
@@ -426,6 +507,31 @@ void setup() {
 	  buttonsManager->addButtonHandler(new TestButtonHandler(upButtonBis));
 	  buttonsManager->addButtonHandler(new TestButtonHandler(rightButtonBis));
 	  buttonsManager->addButtonHandler(new TestButtonHandler(okButtonBis));
+
+
+
+
+	  Menu *menu = new Menu();
+	  menu->addItem(new MenuItem( "1-Heure", NULL ));
+	  menu->addItem(new MenuItem( "2-Heure lever", NULL ));
+	  menu->addItem(new MenuItem( "3-Heure coucher", NULL ));
+	  menu->addItem(new MenuItem( "4-Position haute", NULL ));
+	  menu->addItem(new MenuItem( "5-Position basse", NULL ));
+
+	  MenuButtonHandlersGenerator *menuButtonHandlersGenerator = new MenuButtonHandlersGenerator(
+			  menu,
+			  SCREEN_MAIN,
+			  SCREEN_MENU,
+			  okButtonBis,
+			  leftButtonBis,
+			  upButtonBis,
+			  downButtonBis
+			  );
+	  LinkedList<ButtonHandler*> menuButtonHandlers = menuButtonHandlersGenerator->generateButtonHandlers();
+	  for( int i ; i < menuButtonHandlers.size() ; i++ ){
+		  buttonsManager->addButtonHandler( menuButtonHandlers.get(i) );
+	  }
+
 
 }
 
@@ -451,7 +557,7 @@ unsigned long lastCheckHourPosition;
 
 
 void loopCheckHourPosition(){
-  if( SCREEN_MAIN.equals(currentScreen) ){
+  if( SCREEN_MAIN == currentState ){
     unsigned long time = getTime();
     if(time > downTime){
       if( currentPosition != downPosition ){
@@ -490,11 +596,6 @@ void loopLed(){
 
 }
 
-void loopDisplayTime(){
-  if(SCREEN_MAIN.equals(currentScreen)){
-    displayLcd( getFullHourStr(), "" );
-  }
-}
 
 
 //void loop() {
