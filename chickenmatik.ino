@@ -1,14 +1,16 @@
 #include <Arduino.h>
 #include <LiquidCrystal.h>
-#include <Stepper.h>
 #include <RTClib.h>
+#include <Stepper.h>
+#include "timeHandler.h"
 #include "menu.h"
+#include "LoopManager.h"
+
+TimeHandler timeHandler;
 
 //Stepper
 int nombreDePas = 48*64;
 Stepper monMoteur(nombreDePas, A1, A3, A2, A0);
-
-RTC_DS1307 rtc;
 
 const int LEFT_BUTTON_PIN = 6;
 const int DOWN_BUTTON_PIN = 7;
@@ -318,42 +320,67 @@ void refreshButtonsState(){
   }
 }
 
+//void setup() {
+//
+//  Serial.begin(9600);
+//  timeHandler.setup();
+//
+//
+//  pinMode(LEFT_BUTTON_PIN, INPUT);
+//  pinMode(DOWN_BUTTON_PIN, INPUT);
+//  pinMode(UP_BUTTON_PIN, INPUT);
+//  pinMode(RIGHT_BUTTON_PIN, INPUT);
+//  pinMode(OK_BUTTON_PIN, INPUT);
+//
+//  pinMode(LED_PIN, OUTPUT);
+//
+//
+//
+//  // set up the LCD's number of columns and rows:
+//  lcd.begin(16, 2);
+//  // Print a message to the LCD.
+//  lcd.print("hello, world!");
+//
+//  monMoteur.setSpeed(9);
+//
+//
+//}
+
+class SayAaaLooper: public Looper {
+public:
+	void doLoop(){
+		Serial.println("AAA");
+	}
+
+};
+class SayBbbLooper: public Looper {
+public:
+	void doLoop(){
+		Serial.println("BBB");
+	}
+
+};
+
+class SayCccLooper: public Looper {
+public:
+	void doLoop(){
+		Serial.println("CCC");
+	}
+};
+
+
+LoopManager loopManager;
 void setup() {
 
-  Serial.begin(9600);
+	Serial.begin(9600);
 
+	SayAaaLooper *sayAaaLooper = new SayAaaLooper();
+	SayBbbLooper *sayBbbLooper = new SayBbbLooper();
 
-  if (! rtc.begin()) {
-    Serial.println("Couldn't find RTC");
-    while (1);
-  }
-
-  if (! rtc.isrunning()) {
-    Serial.println("RTC is NOT running!");
-    while (1);
-  }
-  //rtc.adjust(DateTime(2017, 9, 2, 20, 00, 00));
-
-
-  pinMode(LEFT_BUTTON_PIN, INPUT);
-  pinMode(DOWN_BUTTON_PIN, INPUT);
-  pinMode(UP_BUTTON_PIN, INPUT);
-  pinMode(RIGHT_BUTTON_PIN, INPUT);
-  pinMode(OK_BUTTON_PIN, INPUT);
-
-  pinMode(LED_PIN, OUTPUT);
-
-
-
-  // set up the LCD's number of columns and rows:
-  lcd.begin(16, 2);
-  // Print a message to the LCD.
-  lcd.print("hello, world!");
-
-  monMoteur.setSpeed(9);
-
-
+	loopManager.addLooper(sayAaaLooper, 1000);
+	loopManager.addLooper(sayBbbLooper, 3001);
 }
+
 
 
 
@@ -422,93 +449,99 @@ void loopDisplayTime(){
 }
 
 
+//void loop() {
+//
+//
+//
+//	//test RTC
+//
+//    DateTime now = timeHandler.getCurrentDate();
+//
+//    Serial.print(now.year(), DEC);
+//    Serial.print('/');
+//    Serial.print(now.month(), DEC);
+//    Serial.print('/');
+//    Serial.print(now.day(), DEC);
+//    Serial.print(" ");
+//    Serial.print(now.hour(), DEC);
+//    Serial.print(':');
+//    Serial.print(now.minute(), DEC);
+//    Serial.print(':');
+//    Serial.print(now.second(), DEC);
+//    Serial.println();
+//
+//
+//
+//
+//  //monMoteur.step(2000);
+//  //monMoteur.step(-2000);
+//
+//
+//      if( ( currentScreen == SCREEN_DO_UP_POSITION || currentScreen == SCREEN_DO_DOWN_POSITION ) && digitalRead(UP_BUTTON_PIN) == HIGH ){
+//        step(20);
+//      }
+//      else if( ( currentScreen == SCREEN_DO_UP_POSITION || currentScreen == SCREEN_DO_DOWN_POSITION ) && digitalRead(DOWN_BUTTON_PIN) == HIGH ){
+//        step(-20);
+//      }
+//
+//
+//  int currentMs = millis();
+//
+//
+//  if( currentMs > lastLedLoopTime + LOOP_LED_INTERVAL ){
+//    lastLedLoopTime = currentMs;
+//    loopLed();
+//  }
+//
+//
+//  if( currentMs > lastTimeDisplayTime + LOOP_TIME_DISPLAY_INTERVAL ){
+//    lastTimeDisplayTime = currentMs;
+//    loopDisplayTime();
+//  }
+//
+//  if( currentMs > lastCheckHourPosition + CHECK_HOUR_POSITION_INTERVAL ){
+//    lastCheckHourPosition = currentMs;
+//    loopCheckHourPosition();
+//  }
+//
+//
+//
+//
+//  // read the state of the pushbutton value:
+//  refreshButtonsState();
+//
+//
+//  // set the cursor to column 0, line 1
+//  // (note: line 1 is the second row, since counting begins with 0):
+//  lcd.setCursor(0, 1);
+//  // print the number of seconds since reset:
+//  //lcd.print(millis()/1000);
+//
+//  /*
+//  if (leftButtonState == HIGH) {
+//    lcd.print("LEFT ");
+//  }
+//  else if (downButtonState == HIGH) {
+//    lcd.print("DOWN ");
+//  }
+//  else if (upButtonState == HIGH) {
+//    lcd.print("UP   ");
+//  }
+//  else if (rightButtonState == HIGH) {
+//    lcd.print("RIGHT");
+//  }
+//  else if (okButtonState == HIGH) {
+//    displayMenu(MAIN_MENU);
+//    lcd.print("OK   ");
+//  }
+//  else{
+//    lcd.print("     ");
+//  }*/
+//
+//}
+
+
 void loop() {
 
-
-
-	//test RTC
-
-    DateTime now = rtc.now();
-
-    Serial.print(now.year(), DEC);
-    Serial.print('/');
-    Serial.print(now.month(), DEC);
-    Serial.print('/');
-    Serial.print(now.day(), DEC);
-    Serial.print(" ");
-    Serial.print(now.hour(), DEC);
-    Serial.print(':');
-    Serial.print(now.minute(), DEC);
-    Serial.print(':');
-    Serial.print(now.second(), DEC);
-    Serial.println();
-
-
-
-
-  //monMoteur.step(2000);
-  //monMoteur.step(-2000);
-
-
-      if( ( currentScreen == SCREEN_DO_UP_POSITION || currentScreen == SCREEN_DO_DOWN_POSITION ) && digitalRead(UP_BUTTON_PIN) == HIGH ){
-        step(20);
-      }
-      else if( ( currentScreen == SCREEN_DO_UP_POSITION || currentScreen == SCREEN_DO_DOWN_POSITION ) && digitalRead(DOWN_BUTTON_PIN) == HIGH ){
-        step(-20);
-      }
-
-
-  int currentMs = millis();
-
-
-  if( currentMs > lastLedLoopTime + LOOP_LED_INTERVAL ){
-    lastLedLoopTime = currentMs;
-    loopLed();
-  }
-
-
-  if( currentMs > lastTimeDisplayTime + LOOP_TIME_DISPLAY_INTERVAL ){
-    lastTimeDisplayTime = currentMs;
-    loopDisplayTime();
-  }
-
-  if( currentMs > lastCheckHourPosition + CHECK_HOUR_POSITION_INTERVAL ){
-    lastCheckHourPosition = currentMs;
-    loopCheckHourPosition();
-  }
-
-
-
-
-  // read the state of the pushbutton value:
-  refreshButtonsState();
-
-
-  // set the cursor to column 0, line 1
-  // (note: line 1 is the second row, since counting begins with 0):
-  lcd.setCursor(0, 1);
-  // print the number of seconds since reset:
-  //lcd.print(millis()/1000);
-
-  /*
-  if (leftButtonState == HIGH) {
-    lcd.print("LEFT ");
-  }
-  else if (downButtonState == HIGH) {
-    lcd.print("DOWN ");
-  }
-  else if (upButtonState == HIGH) {
-    lcd.print("UP   ");
-  }
-  else if (rightButtonState == HIGH) {
-    lcd.print("RIGHT");
-  }
-  else if (okButtonState == HIGH) {
-    displayMenu(MAIN_MENU);
-    lcd.print("OK   ");
-  }
-  else{
-    lcd.print("     ");
-  }*/
-
+	loopManager.loop();
 }
