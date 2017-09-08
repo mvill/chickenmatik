@@ -124,12 +124,6 @@ void displayLcd( String line1, String line2 ){
 }
 
 
-void displayMainScreen(){
-
-  displayLcd("ChickenMatic", "1-Heure");
-}
-
-
 class Executable{
 	void virtual execute(){
 
@@ -209,6 +203,25 @@ public:
 		return currentState == initialState;
 	}
 	void handleButtonPressed(){
+
+		Serial.print("menuItem->label : ");
+		Serial.println(String(menuItem->label));
+//
+		Serial.print("initialState : ");
+		Serial.println(initialState);
+//
+		Serial.print("button->label : ");
+		Serial.println(button->label);
+//
+		Serial.print("old state : ");
+		Serial.println(currentState);
+//
+		Serial.print("new state : ");
+		Serial.println(menuItem->menuState);
+
+//		Serial.println("FFFFFFFFFFFFFFF 2");
+
+
 		currentState = menuItem->menuState;
 	    displayLcd("MENU", menuItem->label);
 	}
@@ -266,6 +279,11 @@ public:
 			MenuItem *currentMenuItem = menu->items.get(i);
 			MenuItem *previousMenuItem = getPreviousItem(i);
 			MenuItem *nextMenuItem = getNextItem(i);
+//			Serial.println("EEEEEEEEEEEE 1");
+//			Serial.println(currentMenuItem->label);
+//			Serial.println(previousMenuItem->label);
+//			Serial.println(nextMenuItem->label);
+//			Serial.println("EEEEEEEEEEEE 2");
 
 			MenuNavButtonHandler *previousButtonHandler = new MenuNavButtonHandler(nextButton, previousMenuItem->menuState, currentMenuItem);
 			MenuNavButtonHandler *nextButtonHandler = new MenuNavButtonHandler(previousButton, nextMenuItem->menuState, currentMenuItem);

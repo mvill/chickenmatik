@@ -50,25 +50,37 @@ public:
 			boolean newState = button->isPressed();
 			if( newState != lastState ){
 				currentButtonWrapper->previousState = newState;
+
+				//Search for the first handler matching condition
 				int nbHandlers = currentButtonWrapper->handlers.size();
+				LinkedList<ButtonHandler*> matchingHandlers = LinkedList<ButtonHandler*>();
 				for( int j = 0 ; j < nbHandlers ; j++ ){
 
 					ButtonHandler *handler = currentButtonWrapper->handlers.get(j);
 
-					Serial.println("HEY1");
-					Serial.println(currentButtonWrapper->handlers.size());
-					Serial.println("HEY2");
+//					Serial.println("HEY1");
+//					Serial.println(currentButtonWrapper->handlers.size());
+//					Serial.println("HEY2");
 
 					if( handler->mustCheck() ){
-						handler->handleButtonChanged(newState);
-						if( newState ){
-							handler->handleButtonPressed();
-						}
-						else{
-							handler->handleButtonReleased();
-						}
+						matchingHandlers.add(handler);
+//						Serial.println("MMMMMM");
 					}
 				}
+
+				//Call matchingHandlers
+				int nbMatchingHandlers = matchingHandlers.size();
+				for( int j = 0 ; j < nbMatchingHandlers ; j++ ){
+					ButtonHandler *matchingHandler = matchingHandlers.get(j);
+					matchingHandler->handleButtonChanged(newState);
+					if( newState ){
+						matchingHandler->handleButtonPressed();
+					}
+					else{
+						matchingHandler->handleButtonReleased();
+					}
+				}
+
 			}
 //			Serial.println("manage 5");
 		}
