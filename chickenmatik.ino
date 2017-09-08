@@ -54,6 +54,7 @@ long currentPosition = 0;
 long upPosition = 0;
 long downPosition = 0;
 
+
 void step( long stepValue ){
   currentPosition += stepValue;
   monMoteur.step(stepValue);
@@ -76,6 +77,18 @@ void stepToUpPosition(){
 }
 //END STEP MANAGEMENT
 
+int getFreeRam()
+{
+  extern int __heap_start, *__brkval;
+  int v;
+
+  v = (int) &v - (__brkval == 0 ? (int) &__heap_start : (int) __brkval);
+
+//  Serial.print(F("Free RAM = "));
+//  Serial.println(v, DEC);
+
+  return v;
+}
 
 //TIME MANAGEMENT
 
@@ -180,11 +193,11 @@ public:
 	}
 
 	bool mustCheck(){
-		Serial.println("MenuShowButtonHandler.mustCheck");
+//		Serial.println("MenuShowButtonHandler.mustCheck");
 		return currentState == initialState;
 	}
 	void handleButtonPressed(){
-		Serial.println("MenuShowButtonHandler.handleButtonPressed");
+//		Serial.println("MenuShowButtonHandler.handleButtonPressed");
 		currentState = menuState;
 	    displayLcd("MENU", "1-Heure");
 	}
@@ -198,26 +211,29 @@ public:
 	MenuNavButtonHandler( Button *button, State initialState, MenuItem *menuItem ) : ButtonHandler(button){
 		this->initialState = initialState;
 		this->menuItem = menuItem;
+//		Serial.print("menuItem->label : ");
+//		Serial.println(String(menuItem->label));
+//		getFreeRam();
 	}
 	bool mustCheck(){
 		return currentState == initialState;
 	}
 	void handleButtonPressed(){
-
-		Serial.print("menuItem->label : ");
-		Serial.println(String(menuItem->label));
-//
-		Serial.print("initialState : ");
-		Serial.println(initialState);
-//
-		Serial.print("button->label : ");
-		Serial.println(button->label);
-//
-		Serial.print("old state : ");
-		Serial.println(currentState);
-//
-		Serial.print("new state : ");
-		Serial.println(menuItem->menuState);
+//		getFreeRam();
+//		Serial.print("menuItem->label : ");
+//		Serial.println(String(menuItem->label));
+////
+//		Serial.print("initialState : ");
+//		Serial.println(initialState);
+////
+//		Serial.print("button->label : ");
+//		Serial.println(button->label);
+////
+//		Serial.print("old state : ");
+//		Serial.println(currentState);
+////
+//		Serial.print("new state : ");
+//		Serial.println(menuItem->menuState);
 
 //		Serial.println("FFFFFFFFFFFFFFF 2");
 
@@ -449,29 +465,6 @@ public:
 //
 //}
 
-class SayAaaLooper: public Looper {
-public:
-	void doLoop(){
-		Serial.println("AAA");
-	}
-
-};
-class SayBbbLooper: public Looper {
-public:
-	void doLoop(){
-		Serial.println("BBB");
-	}
-
-};
-
-class SayCccLooper: public Looper {
-public:
-	void doLoop(){
-		Serial.println("CCC");
-	}
-};
-
-
 Button *leftButtonBis = new ClassicButton("LEFT", LEFT_BUTTON_PIN );
 Button *downButtonBis = new ClassicButton("DOWN", DOWN_BUTTON_PIN );
 Button *upButtonBis = new ClassicButton("UP", UP_BUTTON_PIN );
@@ -482,10 +475,10 @@ class TestButtonHandler : public ButtonHandler{
 public:
 	TestButtonHandler(Button *button): ButtonHandler(button){}
 	void handleButtonPressed(){
-		Serial.println(String(this->button->label + String(" pressed")));
+//		Serial.println(String(this->button->label + String(" pressed")));
 	}
 	void handleButtonReleased(){
-		Serial.println(String(this->button->label + String(" released")));
+//		Serial.println(String(this->button->label + String(" released")));
 	}
 };
 
@@ -511,6 +504,7 @@ public:
 
 LoopManager loopManager;
 void setup() {
+//	getFreeRam();
 
 	Serial.begin(9600);
 
@@ -528,13 +522,8 @@ void setup() {
 
 
 
-	SayAaaLooper *sayAaaLooper = new SayAaaLooper();
-	SayBbbLooper *sayBbbLooper = new SayBbbLooper();
 	ButtonsLooper *buttonsLooper = new ButtonsLooper();
 	TimeDisplayLooper *timeDisplayLooper = new TimeDisplayLooper();
-
-//	loopManager.addLooper(sayAaaLooper, 1000);
-//	loopManager.addLooper(sayBbbLooper, 3001);
 	loopManager.addLooper(buttonsLooper, 50);
 	loopManager.addLooper(timeDisplayLooper, 1);
 
@@ -574,7 +563,7 @@ void setup() {
 			  downButtonBis
 			  );
 	  LinkedList<ButtonHandler*> menuButtonHandlers = menuButtonHandlersGenerator->generateButtonHandlers();
-	  Serial.println(menuButtonHandlers.size());
+//	  Serial.println(menuButtonHandlers.size());
 	  for( int i ; i < menuButtonHandlers.size() ; i++ ){
 		  buttonsManager->addButtonHandler( menuButtonHandlers.get(i) );
 	  }
