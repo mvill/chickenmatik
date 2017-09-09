@@ -20,6 +20,9 @@ private:
 public:
 	void addButtonHandler(ButtonHandler *buttonHandler){
 
+//		Serial.println(F("addButtonHandler"));
+
+
 		//Search for existing button
 		int nbButtons = buttonWrappers.size();
 		bool buttonAlreadyExists = false;
@@ -40,6 +43,8 @@ public:
 	}
 	void manage(){
 		int nbButtons = buttonWrappers.size();
+//		Serial.println(F("MMMMMM"));
+//		Serial.println(String(nbButtons));
 		for(int i = 0; i < nbButtons; i++) {
 			ButtonWrapper *currentButtonWrapper = buttonWrappers.get(i);
 
@@ -64,7 +69,6 @@ public:
 
 					if( handler->mustCheck() ){
 						matchingHandlers.add(handler);
-//						Serial.println("MMMMMM");
 					}
 				}
 

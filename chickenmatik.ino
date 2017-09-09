@@ -6,23 +6,15 @@
 #include "LoopManager.h"
 #include "ButtonsManager.h"
 #include "ButtonHandler.h"
-#include "ClassicButton.h"
+#include "AnalogButton.h"
 
 TimeHandler timeHandler;
 
 //Stepper
 int nombreDePas = 48*64;
-Stepper monMoteur(nombreDePas, A1, A3, A2, A0);
+Stepper monMoteur(nombreDePas, 7, 9, 8, 6);
 
-const int LEFT_BUTTON_PIN = 6;
-const int DOWN_BUTTON_PIN = 7;
-const int UP_BUTTON_PIN = 8;
-const int RIGHT_BUTTON_PIN = 9;
-const int OK_BUTTON_PIN = 10;
-
-const int LED_PIN = A0;
-
-const int NB_BUTTONS = 5;
+const int BUTTONS_PIN = A0;
 
 
 
@@ -465,22 +457,11 @@ public:
 //
 //}
 
-Button *leftButtonBis = new ClassicButton("LEFT", LEFT_BUTTON_PIN );
-Button *downButtonBis = new ClassicButton("DOWN", DOWN_BUTTON_PIN );
-Button *upButtonBis = new ClassicButton("UP", UP_BUTTON_PIN );
-Button *rightButtonBis = new ClassicButton("RIGHT", RIGHT_BUTTON_PIN );
-Button *okButtonBis = new ClassicButton("OK", OK_BUTTON_PIN );
-
-class TestButtonHandler : public ButtonHandler{
-public:
-	TestButtonHandler(Button *button): ButtonHandler(button){}
-	void handleButtonPressed(){
-//		Serial.println(String(this->button->label + String(" pressed")));
-	}
-	void handleButtonReleased(){
-//		Serial.println(String(this->button->label + String(" released")));
-	}
-};
+Button *okButton = new AnalogButton("OK", BUTTONS_PIN, 450, 699 );
+Button *leftButton = new AnalogButton("LEFT", BUTTONS_PIN, 300, 449 );
+Button *downButton = new AnalogButton("DOWN", BUTTONS_PIN, 150, 299 );
+Button *upButton = new AnalogButton("UP", BUTTONS_PIN, 50, 149 );
+Button *rightButton = new AnalogButton("RIGHT", BUTTONS_PIN, 0, 49 );
 
 
 ButtonsManager *buttonsManager = new ButtonsManager();
@@ -525,23 +506,18 @@ void setup() {
 	ButtonsLooper *buttonsLooper = new ButtonsLooper();
 	TimeDisplayLooper *timeDisplayLooper = new TimeDisplayLooper();
 	loopManager.addLooper(buttonsLooper, 50);
-	loopManager.addLooper(timeDisplayLooper, 1);
+	loopManager.addLooper(timeDisplayLooper, 500);
 
 
 
+	  pinMode(BUTTONS_PIN,INPUT);
 
 
-	  pinMode(LEFT_BUTTON_PIN, INPUT);
-	  pinMode(DOWN_BUTTON_PIN, INPUT);
-	  pinMode(UP_BUTTON_PIN, INPUT);
-	  pinMode(RIGHT_BUTTON_PIN, INPUT);
-	  pinMode(OK_BUTTON_PIN, INPUT);
-
-	  buttonsManager->addButtonHandler(new TestButtonHandler(leftButtonBis));
-	  buttonsManager->addButtonHandler(new TestButtonHandler(downButtonBis));
-	  buttonsManager->addButtonHandler(new TestButtonHandler(upButtonBis));
-	  buttonsManager->addButtonHandler(new TestButtonHandler(rightButtonBis));
-	  buttonsManager->addButtonHandler(new TestButtonHandler(okButtonBis));
+//	  buttonsManager->addButtonHandler(new TestButtonHandler(leftButtonBis));
+//	  buttonsManager->addButtonHandler(new TestButtonHandler(downButtonBis));
+//	  buttonsManager->addButtonHandler(new TestButtonHandler(upButtonBis));
+//	  buttonsManager->addButtonHandler(new TestButtonHandler(rightButtonBis));
+//	  buttonsManager->addButtonHandler(new TestButtonHandler(okButtonBis));
 
 
 
@@ -557,13 +533,13 @@ void setup() {
 			  menu,
 			  SCREEN_MAIN,
 			  SCREEN_MENU_TIME,
-			  okButtonBis,
-			  leftButtonBis,
-			  upButtonBis,
-			  downButtonBis
+			  okButton,
+			  leftButton,
+			  upButton,
+			  downButton
 			  );
 	  LinkedList<ButtonHandler*> menuButtonHandlers = menuButtonHandlersGenerator->generateButtonHandlers();
-//	  Serial.println(menuButtonHandlers.size());
+//	  Serial.println(String(menuButtonHandlers.size()));
 	  for( int i ; i < menuButtonHandlers.size() ; i++ ){
 		  buttonsManager->addButtonHandler( menuButtonHandlers.get(i) );
 	  }
@@ -612,26 +588,6 @@ void loopCheckHourPosition(){
   //  stepToUpPosition();
   //}
 }
-
-
-int ledState = LOW;
-
-void loopLed(){
-  int currentMs = millis();
-  if( currentMs > lastLedChangeTime + LED_CHANGE_INTERVAL){
-    lastLedChangeTime = currentMs;
-    if( ledState == LOW ){
-      ledState = HIGH;
-    }
-    else{
-      ledState = LOW;
-    }
-    digitalWrite( LED_PIN, ledState );
-  }
-
-
-}
-
 
 
 //void loop() {
@@ -725,10 +681,17 @@ void loopLed(){
 //
 //}
 
-
+unsigned int interval = 1000;
+unsigned long lastExec = 0;
 void loop() {
 
-//	Serial.println("loop");
+//	int ms = millis();
+//	if( ms > lastExec + interval ){
+//		lastExec = ms;
+//		int val = analogRead(BUTTONS_PIN);
+//		Serial.println(String(val));
+//	}
+
 
 	loopManager.loop();
 }
