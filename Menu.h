@@ -31,17 +31,21 @@ public:
 
 class MenuBackButtonHandler: public ButtonHandler {
 private:
+	Menu *menu;
 	State initialState;
-	State menuState;
 public:
-	MenuBackButtonHandler(Button *button, State initialState, State menuState) :
+	MenuBackButtonHandler(Menu *menu, Button *button, State initialState) :
 			ButtonHandler(button) {
+		this->menu = menu;
 		this->initialState = initialState;
-		this->menuState = menuState;
 	}
 
 	bool mustCheck() {
-		return currentState == menuState;
+		bool res = false;
+		for( int i = 0 ; !res && i < this->menu->items.size() ; i++ ){
+			res = (currentState == this->menu->items.get(i)->menuState);
+		}
+		return res;
 	}
 	void handleButtonPressed() {
 		currentState = initialState;
@@ -141,7 +145,7 @@ public:
 
 		// Back to main screen
 		MenuBackButtonHandler *menuBackButtonHandler =
-				new MenuBackButtonHandler(backButton, initialState, menuState);
+				new MenuBackButtonHandler(menu, backButton, initialState);
 		buttonHandlers.add(menuBackButtonHandler);
 
 		// Main screen to first menu item

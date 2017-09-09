@@ -94,50 +94,6 @@ String getFullHourStr() {
 
 //void handleButtonPressed(Button_t* button){
 //
-//  if( SCREEN_MAIN.equals(currentScreen) && button->label == "OK"){
-//    displayLcd("MENU", "1-Heure");
-//    currentScreen = SCREEN_MENU_TIME;
-//  }
-//  else if(SCREEN_MENU_TIME.equals(currentScreen) && button->label == "DOWN"){
-//    displayLcd("MENU", "2-Heure lever");
-//    currentScreen = SCREEN_MENU_UP_TIME;
-//  }
-//  else if(SCREEN_MENU_TIME.equals(currentScreen) && button->label == "UP"){
-//    displayLcd("MENU", "5-Position basse");
-//    currentScreen = SCREEN_MENU_DOWN_POSITION;
-//  }
-//  else if(SCREEN_MENU_UP_TIME.equals(currentScreen) && button->label == "DOWN"){
-//    displayLcd("MENU", "3-Heure coucher");
-//    currentScreen = SCREEN_MENU_DOWN_TIME;
-//  }
-//  else if(SCREEN_MENU_UP_TIME.equals(currentScreen) && button->label == "UP"){
-//    displayLcd("MENU", "1-Heure");
-//    currentScreen = SCREEN_MENU_TIME;
-//  }
-//  else if(SCREEN_MENU_DOWN_TIME.equals(currentScreen) && button->label == "DOWN"){
-//    displayLcd("MENU", "4-Position haute");
-//    currentScreen = SCREEN_MENU_UP_POSITION;
-//  }
-//  else if(SCREEN_MENU_DOWN_TIME.equals(currentScreen) && button->label == "UP"){
-//    displayLcd("MENU", "2-Heure lever");
-//    currentScreen = SCREEN_MENU_UP_TIME;
-//  }
-//  else if(SCREEN_MENU_UP_POSITION.equals(currentScreen) && button->label == "DOWN"){
-//    displayLcd("MENU", "5-Position basse");
-//    currentScreen = SCREEN_MENU_DOWN_POSITION;
-//  }
-//  else if(SCREEN_MENU_UP_POSITION.equals(currentScreen) && button->label == "UP"){
-//    displayLcd("MENU", "3-Heure coucher");
-//    currentScreen = SCREEN_MENU_DOWN_TIME;
-//  }
-//  else if(SCREEN_MENU_DOWN_POSITION.equals(currentScreen) && button->label == "DOWN"){
-//    displayLcd("MENU", "1-Heure");
-//    currentScreen = SCREEN_MENU_TIME;
-//  }
-//  else if(SCREEN_MENU_DOWN_POSITION.equals(currentScreen) && button->label == "UP"){
-//    displayLcd("MENU", "4-Position haute");
-//    currentScreen = SCREEN_MENU_UP_POSITION;
-//  }
 //
 //  //Reglage de l'heure
 //  else if(SCREEN_MENU_TIME.equals(currentScreen) && button->label == "OK"){
