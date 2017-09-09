@@ -177,6 +177,17 @@ public:
 };
 
 class TimeDisplayLooper: public Looper {
+private:
+	String number2digit(uint16_t nb)
+	{
+	  String val = "";
+	  if (nb < 10)
+	    val = "0" + String(nb);
+	  else
+	    val = String(nb);
+
+	  return val;
+	}
 public:
 	void doLoop() {
 		if (SCREEN_MAIN == currentState) {
@@ -189,7 +200,12 @@ public:
 			Serial.println(String(now.minute()));
 			Serial.println(String(now.second()));
 
-			String hourStr = String(now.hour()) + ":" + String(now.minute()) + ":" + String(now.second());
+			String hPoint = ":";
+		    if ((now.second() % 2) == 0){
+		    	hPoint = " ";
+		    }
+
+			String hourStr = number2digit(now.hour()) + hPoint + number2digit(now.minute()) + hPoint + number2digit(now.second());
 //			String hourStr = String(now.hour()) + ":" + String(now.minute()) + " " + String(now.day()) + "/" + String(now.month()) + "/" + String(now.year());
 
 
