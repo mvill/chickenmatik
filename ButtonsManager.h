@@ -19,10 +19,6 @@ private:
 	LinkedList<ButtonWrapper*> buttonWrappers = LinkedList<ButtonWrapper*>();
 public:
 	void addButtonHandler(ButtonHandler *buttonHandler){
-
-//		Serial.println(F("addButtonHandler"));
-
-
 		//Search for existing button
 		int nbButtons = buttonWrappers.size();
 		bool buttonAlreadyExists = false;
@@ -39,12 +35,10 @@ public:
 			buttonWrapper->handlers.add(buttonHandler);
 			buttonWrappers.add(buttonWrapper);
 		}
-
 	}
+
 	void manage(){
 		int nbButtons = buttonWrappers.size();
-//		Serial.println(F("MMMMMM"));
-//		Serial.println(String(nbButtons));
 		for(int i = 0; i < nbButtons; i++) {
 			ButtonWrapper *currentButtonWrapper = buttonWrappers.get(i);
 
@@ -62,11 +56,6 @@ public:
 				for( int j = 0 ; j < nbHandlers ; j++ ){
 
 					ButtonHandler *handler = currentButtonWrapper->handlers.get(j);
-
-//					Serial.println("HEY1");
-//					Serial.println(currentButtonWrapper->handlers.size());
-//					Serial.println("HEY2");
-
 					if( handler->mustCheck() ){
 						matchingHandlers.add(handler);
 					}
@@ -86,9 +75,7 @@ public:
 				}
 
 			}
-//			Serial.println("manage 5");
 		}
-//		Serial.println("manage 6");
 	}
 };
 
