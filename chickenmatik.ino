@@ -11,7 +11,7 @@
 #include "Menu.h"
 #include "LcdManager.h"
 
-TimeHandler timeHandler;
+TimeHandler *timeHandler = new TimeHandler();
 
 //Stepper
 int nombreDePas = 48 * 64;
@@ -53,44 +53,6 @@ void stepToUpPosition() {
 	step(upPosition - currentPosition);
 }
 //END STEP MANAGEMENT
-
-//TIME MANAGEMENT
-
-//24h en ms
-unsigned long ONE_DAY = 24l * 60l * 60l * 1000l;
-unsigned long ONE_HOUR = 60l * 60l * 1000l;
-unsigned long ONE_MINUTE = 60l * 1000l;
-unsigned long ONE_SECOND = 1000l;
-
-//ms depuis minuit
-unsigned long midnightTime = 0;
-unsigned long upTime = ONE_HOUR * 7l;
-unsigned long downTime = ONE_HOUR * 22l;
-
-//en ms depuis minuit
-unsigned long getTime() {
-	unsigned long now = millis();
-	unsigned long time = (now + ONE_DAY - midnightTime) % ONE_DAY;
-	return time;
-}
-
-void setTime(unsigned long time) {
-	//24h en ms = 24 * 60 * 60 * 1000
-	midnightTime = (millis() + ONE_DAY - time) % ONE_DAY;
-}
-
-//Heure format HH:mm
-String getFullHourStr() {
-	unsigned long time = getTime();
-	unsigned long hours = (time / ONE_HOUR) % 24l;
-	unsigned long minutes = (time / ONE_MINUTE) % 60l;
-	unsigned long seconds = (time / ONE_SECOND) % 60l;
-	String hourStr = String(
-			String(hours) + ":" + String(minutes) + ":" + String(seconds));
-	return hourStr;
-}
-//END TIME MANAGEMENT
-
 
 //void handleButtonPressed(Button_t* button){
 //
@@ -218,7 +180,35 @@ class TimeDisplayLooper: public Looper {
 public:
 	void doLoop() {
 		if (SCREEN_MAIN == currentState) {
-			lcdManager->displayLcd(getFullHourStr(), "");
+
+			DateTime now = timeHandler->getCurrentDate();
+
+			Serial.println(F("NNN"));
+
+			Serial.println(String(now.hour()));
+			Serial.println(String(now.minute()));
+			Serial.println(String(now.second()));
+
+			String hourStr = String(now.hour()) + ":" + String(now.minute()) + ":" + String(now.second());
+//			String hourStr = String(now.hour()) + ":" + String(now.minute()) + " " + String(now.day()) + "/" + String(now.month()) + "/" + String(now.year());
+
+
+			lcdManager->displayLcd(hourStr, "");
+
+			//    DateTime now = timeHandler.getCurrentDate();
+			//
+			//    Serial.print(now.year(), DEC);
+			//    Serial.print('/');
+			//    Serial.print(now.month(), DEC);
+			//    Serial.print('/');
+			//    Serial.print(now.day(), DEC);
+			//    Serial.print(" ");
+			//    Serial.print(now.hour(), DEC);
+			//    Serial.print(':');
+			//    Serial.print(now.minute(), DEC);
+			//    Serial.print(':');
+			//    Serial.print(now.second(), DEC);
+			//    Serial.println();
 		}
 	}
 };
@@ -228,6 +218,8 @@ void setup() {
 //	getFreeRam();
 
 	Serial.begin(9600);
+
+	timeHandler->setup();
 
 	ButtonsLooper *buttonsLooper = new ButtonsLooper();
 	TimeDisplayLooper *timeDisplayLooper = new TimeDisplayLooper();
@@ -268,17 +260,17 @@ unsigned long lastLedLoopTime;
 unsigned long lastLedChangeTime;
 unsigned long lastCheckHourPosition;
 
-void loopCheckHourPosition() {
-	if (SCREEN_MAIN == currentState) {
-		unsigned long time = getTime();
-		if (time > downTime) {
-			if (currentPosition != downPosition) {
-				stepToDownPosition();
-			}
-		} else if (time > upTime && currentPosition != upPosition) {
-			stepToUpPosition();
-		}
-	}
+//void loopCheckHourPosition() {
+//	if (SCREEN_MAIN == currentState) {
+//		unsigned long time = getTime();
+//		if (time > downTime) {
+//			if (currentPosition != downPosition) {
+//				stepToDownPosition();
+//			}
+//		} else if (time > upTime && currentPosition != upPosition) {
+//			stepToUpPosition();
+//		}
+//	}
 
 	//if( getTime() > downTime && currentPosition != downPosition ){
 	//  stepToDownPosition();
@@ -286,7 +278,7 @@ void loopCheckHourPosition() {
 	//else if( getTime() > upTime && getTime() < downTime && currentPosition != upPosition ){
 	//  stepToUpPosition();
 	//}
-}
+//}
 
 //void loop() {
 //

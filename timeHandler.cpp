@@ -19,7 +19,7 @@ void TimeHandler::setup(){
 		Serial.println("RTC is NOT running!");
 		while (1);
 	}
-	//rtc.adjust(DateTime(2017, 9, 2, 20, 00, 00));
+//	rtc.adjust(DateTime(2017, 9, 2, 20, 00, 00));
 }
 
 void TimeHandler::loop(){
