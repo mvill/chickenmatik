@@ -14,9 +14,7 @@ public:
 		this->maxAnalogValue = maxAnalogValue;
 	}
 	bool isPressed(){
-		Serial.println(F("YO"));
 		int state = analogRead(pin);
-		Serial.println(String(state));
 		bool result = state <= maxAnalogValue && state >= minAnalogValue;
 		return result;
 	}
