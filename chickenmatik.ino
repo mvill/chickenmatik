@@ -6,7 +6,6 @@
 #include "LoopManager.h"
 #include "ButtonsManager.h"
 #include "ButtonHandler.h"
-#include "AnalogButton.h"
 #include "HourInputManager.h"
 #include "State.h"
 #include "Menu.h"
