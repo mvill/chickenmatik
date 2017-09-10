@@ -16,6 +16,10 @@ public:
 	}
 
 	//Methods
+	virtual bool mustCheck(){
+		//True by default
+		return true;
+	}
 	virtual void handleButtonChanged(bool state){
 		//Nothing by default
 	}
@@ -25,9 +29,24 @@ public:
 	virtual void handleButtonReleased(){
 		//Nothing by default
 	}
+};
+
+class GlobalHandler{
+public:
+
+	//Methods
 	virtual bool mustCheck(){
 		//True by default
 		return true;
+	}
+	virtual void handleButtonChanged(Button *button, bool state){
+		//Nothing by default
+	}
+	virtual void handleButtonPressed(Button *button){
+		//Nothing by default
+	}
+	virtual void handleButtonReleased(Button *button){
+		//Nothing by default
 	}
 };
 

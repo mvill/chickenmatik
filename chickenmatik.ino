@@ -230,7 +230,57 @@ public:
 };
 
 LoopManager loopManager;
+
+
+class CallbackCancelMenu: public Executable{
+	void execute() {
+		currentState = SCREEN_MAIN;
+	}
+};
+
+
+
+class MyGlobalHandler: public GlobalHandler{
+private:
+	MenuManager *menuManager;
+public:
+	MyGlobalHandler(MenuManager *menuManager){
+		this->menuManager = menuManager;
+	}
+	virtual bool mustCheck(){
+		return currentState == SCREEN_MAIN;
+	}
+	virtual void handleButtonPressed(Button *button){
+		if( button == okButton ){
+			currentState = SCREEN_MENU;
+			menuManager->show();
+		}
+	}
+};
+
 void setup() {
+
+
+	buttonsManager->addButton(rightButton);
+	buttonsManager->addButton(leftButton);
+	buttonsManager->addButton(upButton);
+	buttonsManager->addButton(downButton);
+	buttonsManager->addButton(okButton);
+
+
+	Menu *menu = new Menu(new CallbackCancelMenu());
+	menu->addItem(new MenuItem("1-Heure", new CallbackCancelMenu()));
+	menu->addItem(new MenuItem("2-Heure lever", NULL));
+	menu->addItem(new MenuItem("3-Heure coucher", NULL));
+	menu->addItem(new MenuItem("4-Position haute", NULL));
+	menu->addItem( new MenuItem("5-Position basse", NULL));
+	MenuManager *menuManager = new MenuManager(buttonsManager, lcdManager, menu, okButton, leftButton, upButton, downButton);
+
+
+
+
+	buttonsManager->addGlobalHandler(new MyGlobalHandler(menuManager));
+
 //	getFreeRam();
 
 	Serial.begin(9600);
@@ -244,24 +294,7 @@ void setup() {
 
 	pinMode(BUTTONS_PIN, INPUT);
 
-	Menu *menu = new Menu();
-	menu->addItem(new MenuItem("1-Heure", SCREEN_MENU_TIME, NULL));
-	menu->addItem(new MenuItem("2-Heure lever", SCREEN_MENU_UP_TIME, NULL));
-	menu->addItem(new MenuItem("3-Heure coucher", SCREEN_MENU_DOWN_TIME, NULL));
-	menu->addItem(
-			new MenuItem("4-Position haute", SCREEN_MENU_UP_POSITION, NULL));
-	menu->addItem(
-			new MenuItem("5-Position basse", SCREEN_MENU_DOWN_POSITION, NULL));
 
-	MenuButtonHandlersGenerator *menuButtonHandlersGenerator =
-			new MenuButtonHandlersGenerator(lcdManager, menu, SCREEN_MAIN, SCREEN_MENU_TIME,
-					okButton, leftButton, upButton, downButton);
-	LinkedList<ButtonHandler*> menuButtonHandlers =
-			menuButtonHandlersGenerator->generateButtonHandlers();
-//	  Serial.println(String(menuButtonHandlers.size()));
-	for (int i = 0; i < menuButtonHandlers.size(); i++) {
-		buttonsManager->addButtonHandler(menuButtonHandlers.get(i));
-	}
 
 }
 

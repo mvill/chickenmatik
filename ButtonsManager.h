@@ -17,24 +17,28 @@ public:
 class ButtonsManager{
 private:
 	LinkedList<ButtonWrapper*> buttonWrappers = LinkedList<ButtonWrapper*>();
+	LinkedList<GlobalHandler*> globalHandlers = LinkedList<GlobalHandler*>();
 public:
+
+	void addButton(Button *button){
+		ButtonWrapper *buttonWrapper = new ButtonWrapper(button);
+		buttonWrappers.add(buttonWrapper);
+	}
+
 	void addButtonHandler(ButtonHandler *buttonHandler){
 		//Search for existing button
 		int nbButtons = buttonWrappers.size();
-		bool buttonAlreadyExists = false;
-		for( int i = 0 ; i < nbButtons && !buttonAlreadyExists ; i++ ){
+		for( int i = 0 ; i < nbButtons ; i++ ){
 			ButtonWrapper *currentButtonWrapper = buttonWrappers.get(i);
 			if( currentButtonWrapper->button == buttonHandler->button ){
-				buttonAlreadyExists = true;
 				currentButtonWrapper->handlers.add(buttonHandler);
 				break;
 			}
 		}
-		if( !buttonAlreadyExists ){
-			ButtonWrapper *buttonWrapper = new ButtonWrapper(buttonHandler->button);
-			buttonWrapper->handlers.add(buttonHandler);
-			buttonWrappers.add(buttonWrapper);
-		}
+	}
+
+	void addGlobalHandler(GlobalHandler *globalHandler){
+		globalHandlers.add(globalHandler);
 	}
 
 	void manage(){
@@ -61,6 +65,16 @@ public:
 					}
 				}
 
+
+				//Search for matching globalHandlers
+				LinkedList<GlobalHandler*> matchingGlobalHandlers = LinkedList<GlobalHandler*>();
+				for(int j = 0 ; j < globalHandlers.size() ; j++){
+					GlobalHandler *globalHandler = globalHandlers.get(j);
+					if( globalHandler->mustCheck() ){
+						matchingGlobalHandlers.add(globalHandler);
+					}
+				}
+
 				//Call matchingHandlers
 				int nbMatchingHandlers = matchingHandlers.size();
 				for( int j = 0 ; j < nbMatchingHandlers ; j++ ){
@@ -71,6 +85,18 @@ public:
 					}
 					else{
 						matchingHandler->handleButtonReleased();
+					}
+				}
+
+				//Call matchingGlobalHandlers
+				for( int j = 0 ; j < matchingGlobalHandlers.size() ; j++ ){
+					GlobalHandler *globalHandler = matchingGlobalHandlers.get(j);
+					globalHandler->handleButtonChanged(button, newState);
+					if( newState ){
+						globalHandler->handleButtonPressed( button );
+					}
+					else{
+						globalHandler->handleButtonReleased( button );
 					}
 				}
 

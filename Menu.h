@@ -1,9 +1,11 @@
+#include <Arduino.h>
 #include "LcdManager.h"
 
 #ifndef Menu_h
 #define Menu_h
 
 class Executable {
+public:
 	void virtual execute() {
 
 	}
@@ -12,166 +14,116 @@ class Executable {
 class MenuItem {
 public:
 	String label;
-	State menuState;
 	Executable *handler;
-	MenuItem(String label, State menuState, Executable *handler) {
+	MenuItem(String label, Executable *handler) {
 		this->label = label;
-		this->menuState = menuState;
 		this->handler = handler;
 	}
 };
 
 class Menu {
+private:
 public:
+	Executable *callbackCancel;
 	LinkedList<MenuItem*> items = LinkedList<MenuItem*>();
+	Menu( Executable *callbackCancel ){
+		this->callbackCancel = callbackCancel;
+	}
 	void addItem(MenuItem *item) {
 		items.add(item);
 	}
 };
 
-class MenuBackButtonHandler: public ButtonHandler {
+
+class MenuManager : public GlobalHandler{
 private:
-	Menu *menu;
-	State initialState;
-public:
-	MenuBackButtonHandler(Menu *menu, Button *button, State initialState) :
-			ButtonHandler(button) {
-		this->menu = menu;
-		this->initialState = initialState;
-	}
-
-	bool mustCheck() {
-		bool res = false;
-		for( int i = 0 ; !res && i < this->menu->items.size() ; i++ ){
-			res = (currentState == this->menu->items.get(i)->menuState);
-		}
-		return res;
-	}
-	void handleButtonPressed() {
-		currentState = initialState;
-	}
-};
-
-class MenuShowButtonHandler: public ButtonHandler {
-private:
-	LcdManager *lcdManager;
-	State initialState;
-	State menuState;
-public:
-	MenuShowButtonHandler(LcdManager *lcdManager, Button *button,
-			State initialState, State menuState) :
-			ButtonHandler(button) {
-		this->lcdManager = lcdManager;
-		this->initialState = initialState;
-		this->menuState = menuState;
-	}
-
-	bool mustCheck() {
-//		Serial.println("MenuShowButtonHandler.mustCheck");
-		return currentState == initialState;
-	}
-	void handleButtonPressed() {
-//		Serial.println("MenuShowButtonHandler.handleButtonPressed");
-		currentState = menuState;
-		this->lcdManager->displayLcd("MENU", "1-Heure");
-	}
-};
-
-class MenuNavButtonHandler: public ButtonHandler {
-private:
-	LcdManager *lcdManager;
-	State initialState;
-	MenuItem *menuItem;
-public:
-	MenuNavButtonHandler(LcdManager *lcdManager, Button *button,
-			State initialState, MenuItem *menuItem) :
-			ButtonHandler(button) {
-		this->lcdManager = lcdManager;
-		this->initialState = initialState;
-		this->menuItem = menuItem;
-	}
-	bool mustCheck() {
-		return currentState == initialState;
-	}
-	void handleButtonPressed() {
-		currentState = menuItem->menuState;
-		this->lcdManager->displayLcd("MENU", menuItem->label);
-	}
-};
-
-class MenuButtonHandlersGenerator {
-private:
+	ButtonsManager *buttonsManager;
 	LcdManager *lcdManager;
 	Menu *menu;
-	State initialState;
-	State menuState;
 	Button *okButton;
 	Button *backButton;
 	Button *previousButton;
 	Button *nextButton;
-	MenuItem* getPreviousItem(int currentItemIndex) {
-		int neededIndex = currentItemIndex - 1;
-		//TODO do it with modulos
+
+	bool showing = false;
+	MenuItem *currentItem;
+
+	int getItemIndex(MenuItem *item){
+		int res = -1;
+		for( int i=0 ; res == -1 && i<menu->items.size() ; i++ ){
+			MenuItem *curItem = menu->items.get(i);
+			if( item->label.equals(curItem->label) ){
+				res = i;
+			}
+		}
+		return res;
+	}
+	MenuItem* getPreviousItem(MenuItem* fromItem) {
+		int neededIndex = getItemIndex(fromItem) - 1;
 		if (neededIndex < 0) {
 			neededIndex = neededIndex + menu->items.size();
 		}
 		return menu->items.get(neededIndex);
 	}
-	MenuItem* getNextItem(int currentItemIndex) {
-		int neededIndex = currentItemIndex + 1;
-		//TODO do it with modulos
+	MenuItem* getNextItem(MenuItem* fromItem){
+
+		int neededIndex = getItemIndex(fromItem) + 1;
 		if (neededIndex >= menu->items.size()) {
 			neededIndex = neededIndex - menu->items.size();
 		}
 		return menu->items.get(neededIndex);
 	}
-
+	void showItem( MenuItem* item ){
+		currentItem = item;
+		this->lcdManager->displayLcd("MENU", item->label);
+	}
 public:
-	MenuButtonHandlersGenerator(LcdManager *lcdManager, Menu *menu,
-			State initialState, State menuState, Button *okButton,
-			Button *backButton, Button *previousButton, Button *nextButton) {
+
+	bool mustCheck(){
+		return showing;
+	}
+
+	void handleButtonPressed(Button *button){
+		if( button == okButton ){
+			showing = false;
+			currentItem->handler->execute();
+		}
+		else if(button == nextButton){
+			MenuItem *nextItem = getNextItem( currentItem );
+			showItem(nextItem);
+		}
+		else if(button == previousButton){
+			MenuItem *previousItem = getPreviousItem(currentItem);
+			showItem(previousItem);
+		}
+		else if( button == backButton ){
+			showing = false;
+			menu->callbackCancel->execute();
+		}
+	}
+
+	void show(){
+		showItem(menu->items.get(0));
+		showing = true;
+	}
+
+	MenuManager(ButtonsManager *buttonsManager, LcdManager *lcdManager,
+			Menu *menu, Button *okButton, Button *backButton,
+			Button *previousButton, Button *nextButton){
+
+
+		this->buttonsManager = buttonsManager;
 		this->lcdManager = lcdManager;
 		this->menu = menu;
-		this->initialState = initialState;
-		this->menuState = menuState;
 		this->okButton = okButton;
 		this->backButton = backButton;
 		this->previousButton = previousButton;
 		this->nextButton = nextButton;
-	}
-	LinkedList<ButtonHandler*> generateButtonHandlers() {
-		LinkedList<ButtonHandler*> buttonHandlers =
-				LinkedList<ButtonHandler*>();
+		this->showing = false;
 
-		// Back to main screen
-		MenuBackButtonHandler *menuBackButtonHandler =
-				new MenuBackButtonHandler(menu, backButton, initialState);
-		buttonHandlers.add(menuBackButtonHandler);
-
-		// Main screen to first menu item
-		MenuShowButtonHandler *menuShowButtonHandler =
-				new MenuShowButtonHandler(lcdManager, okButton, initialState,
-						menuState);
-		buttonHandlers.add(menuShowButtonHandler);
-
-		int nbItems = menu->items.size();
-		for (int i = 0; i < nbItems; i++) {
-			MenuItem *currentMenuItem = menu->items.get(i);
-			MenuItem *previousMenuItem = getPreviousItem(i);
-			MenuItem *nextMenuItem = getNextItem(i);
-			MenuNavButtonHandler *previousButtonHandler =
-					new MenuNavButtonHandler(lcdManager, nextButton,
-							previousMenuItem->menuState, currentMenuItem);
-			MenuNavButtonHandler *nextButtonHandler = new MenuNavButtonHandler(
-					lcdManager,
-					previousButton, nextMenuItem->menuState, currentMenuItem);
-
-			buttonHandlers.add(previousButtonHandler);
-			buttonHandlers.add(nextButtonHandler);
-
-		}
-		return buttonHandlers;
+		buttonsManager->addGlobalHandler(this);
 	}
 };
+
 
 #endif
