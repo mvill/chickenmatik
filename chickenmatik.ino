@@ -11,12 +11,15 @@
 #include "State.h"
 #include "Menu.h"
 #include "LcdManager.h"
+#include "StepperManager.h"
+#include "PositionInputManager.h"
 
 TimeHandler *timeHandler = new TimeHandler();
 
 //Stepper
-int nombreDePas = 48 * 64;
-Stepper monMoteur(nombreDePas, 7, 9, 8, 6);
+int numberOfSteps = 48 * 64;
+Stepper *stepper = new Stepper(numberOfSteps, 7, 9, 8, 6);
+StepperManager *stepperManager = new StepperManager(stepper);
 
 const int BUTTONS_PIN = A0;
 
@@ -27,37 +30,13 @@ uint8_t upMinutes = 0;
 uint8_t downHours = 0;
 uint8_t downMinutes = 0;
 
+long upPosition = 0;
+long downPosition = 0;
+
 
 // initialize the library with the numbers of the interface pins
 LiquidCrystal *lcd = new LiquidCrystal(12, 11, 5, 4, 3, 2);
 LcdManager *lcdManager = new LcdManager(lcd);
-
-//STEP MANAGEMENT
-long currentPosition = 0;
-long upPosition = 0;
-long downPosition = 0;
-
-void step(long stepValue) {
-	currentPosition += stepValue;
-	monMoteur.step(stepValue);
-}
-
-void storeDownPosition() {
-	downPosition = currentPosition;
-}
-
-void storeUpPosition() {
-	upPosition = currentPosition;
-}
-
-void stepToDownPosition() {
-	step(downPosition - currentPosition);
-}
-
-void stepToUpPosition() {
-	step(upPosition - currentPosition);
-}
-//END STEP MANAGEMENT
 
 
 Button *okButton = new AnalogButton("OK", BUTTONS_PIN, 450, 699);
@@ -109,6 +88,26 @@ public:
 	}
 };
 
+
+// STEPPER CALLBACKS
+class SetUpPositionCallback : public CallbackPositionInput{
+	void callback(long position) {
+		upPosition = position;
+    	currentState = SCREEN_MAIN;
+	}
+};
+SetUpPositionCallback *setUpPositionCallback = new SetUpPositionCallback();
+
+class SetDownPositionCallback : public CallbackPositionInput{
+	void callback(long position) {
+		downPosition = position;
+    	currentState = SCREEN_MAIN;
+	}
+};
+SetDownPositionCallback *setDownPositionCallback = new SetDownPositionCallback();
+
+
+// SET TIME CALLBACKS
 class SetTimeCallback: public CallbackHourInput{
     void callback( uint8_t hours, uint8_t minutes ){
     	DateTime currentDateTime = timeHandler->getCurrentDate();
@@ -142,7 +141,12 @@ SetDownTimeCallback *setDownTimeCallback = new SetDownTimeCallback();
 
 
 HourInputManager *hourInputManager = new HourInputManager(buttonsManager, lcdManager, okButton, upButton, downButton);
+PositionInputManager *positionInputManager = new PositionInputManager(buttonsManager, lcdManager, stepperManager, okButton, upButton, downButton);
+
 LoopManager loopManager;
+
+
+// DO TIME EXECUTABLES
 
 class DoTimeInput: public Executable{
 public:
@@ -174,6 +178,29 @@ public:
 	}
 };
 DoDownTimeInput *doDownTimeInputCallback = new DoDownTimeInput();
+
+
+// DO STEPPER EXECUTABLES
+
+class DoUpPositionInput : public Executable{
+	void execute() {
+		currentState = UP_POSITION_INPUT;
+		positionInputManager->show(setUpPositionCallback);
+	}
+};
+DoUpPositionInput *doUpPositionInput = new DoUpPositionInput();
+
+class DoDownPositionInput : public Executable{
+	void execute() {
+		currentState = DOWN_POSITION_INPUT;
+		positionInputManager->show(setDownPositionCallback);
+	}
+};
+DoDownPositionInput *doDownPositionInput = new DoDownPositionInput();
+
+
+
+
 
 
 class CallbackCancelMenu: public Executable{
@@ -220,8 +247,8 @@ void setup() {
 	menu->addItem(new MenuItem("1-Heure", doTimeInputCallback));
 	menu->addItem(new MenuItem("2-Heure lever", doUpTimeInputCallback));
 	menu->addItem(new MenuItem("3-Heure coucher", doDownTimeInputCallback));
-	menu->addItem(new MenuItem("4-Position haute", NULL));
-	menu->addItem( new MenuItem("5-Position basse", NULL));
+	menu->addItem(new MenuItem("4-Position haute", doUpPositionInput));
+	menu->addItem( new MenuItem("5-Position basse", doDownPositionInput));
 	MenuManager *menuManager = new MenuManager(buttonsManager, lcdManager, menu, okButton, leftButton, upButton, downButton);
 
 
@@ -241,6 +268,7 @@ void setup() {
 	loopManager.addLooper(buttonsLooper, 50);
 	loopManager.addLooper(timeDisplayLooper, 500);
 	loopManager.addLooper(hourInputManager, 100);
+	loopManager.addLooper(positionInputManager, 100);
 
 	pinMode(BUTTONS_PIN, INPUT);
 
