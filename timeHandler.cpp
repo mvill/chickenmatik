@@ -27,7 +27,7 @@ void TimeHandler::loop(){
 }
 
 void TimeHandler::setCurrentDate(DateTime datetime){
-
+	rtc.adjust(datetime);
 }
 
 DateTime TimeHandler::getCurrentDate(){
