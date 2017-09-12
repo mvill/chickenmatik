@@ -12,8 +12,12 @@
 #include "LcdManager.h"
 #include "StepperManager.h"
 #include "PositionInputManager.h"
+#include "DataStore.h"
+#include "AutoPositionManager.h"
 
 TimeHandler *timeHandler = new TimeHandler();
+
+DataStore *dataStore = new DataStore();
 
 //Stepper
 int numberOfSteps = 48 * 64;
@@ -21,16 +25,6 @@ Stepper *stepper = new Stepper(numberOfSteps, 7, 9, 8, 6);
 StepperManager *stepperManager = new StepperManager(stepper);
 
 const int BUTTONS_PIN = A0;
-
-
-uint8_t upHours = 0;
-uint8_t upMinutes = 0;
-
-uint8_t downHours = 0;
-uint8_t downMinutes = 0;
-
-long upPosition = 0;
-long downPosition = 0;
 
 
 // initialize the library with the numbers of the interface pins
@@ -91,7 +85,7 @@ public:
 // STEPPER CALLBACKS
 class SetUpPositionCallback : public CallbackPositionInput{
 	void callback(long position) {
-		upPosition = position;
+		dataStore->upPosition = position;
     	currentState = SCREEN_MAIN;
 	}
 };
@@ -99,7 +93,7 @@ SetUpPositionCallback *setUpPositionCallback = new SetUpPositionCallback();
 
 class SetDownPositionCallback : public CallbackPositionInput{
 	void callback(long position) {
-		downPosition = position;
+		dataStore->downPosition = position;
     	currentState = SCREEN_MAIN;
 	}
 };
@@ -120,8 +114,8 @@ SetTimeCallback *setTimeCallback = new SetTimeCallback();
 
 class SetUpTimeCallback: public CallbackHourInput{
     void callback( uint8_t hours, uint8_t minutes ){
-    	upHours = hours;
-    	upMinutes = minutes;
+    	dataStore->upHours = hours;
+    	dataStore->upMinutes = minutes;
     	currentState = SCREEN_MAIN;
     }
 };
@@ -129,8 +123,8 @@ SetUpTimeCallback *setUpTimeCallback = new SetUpTimeCallback();
 
 class SetDownTimeCallback: public CallbackHourInput{
     void callback( uint8_t hours, uint8_t minutes ){
-    	downHours = hours;
-    	downMinutes = minutes;
+    	dataStore->downHours = hours;
+    	dataStore->downMinutes = minutes;
     	currentState = SCREEN_MAIN;
     }
 };
@@ -141,6 +135,8 @@ SetDownTimeCallback *setDownTimeCallback = new SetDownTimeCallback();
 
 HourInputManager *hourInputManager = new HourInputManager(buttonsManager, lcdManager, okButton, upButton, downButton);
 PositionInputManager *positionInputManager = new PositionInputManager(buttonsManager, lcdManager, stepperManager, okButton, upButton, downButton);
+
+AutoPositionManager *autoPositionManager = new AutoPositionManager(dataStore, timeHandler, stepperManager);
 
 LoopManager loopManager;
 
@@ -163,7 +159,7 @@ class DoUpTimeInput: public Executable{
 public:
 	void execute() {
 		currentState = UP_TIME_INPUT;
-		hourInputManager->show(upHours, upMinutes, setUpTimeCallback);
+		hourInputManager->show(dataStore->upHours, dataStore->upMinutes, setUpTimeCallback);
 	}
 };
 DoUpTimeInput *doUpTimeInputCallback = new DoUpTimeInput();
@@ -173,7 +169,7 @@ class DoDownTimeInput: public Executable{
 public:
 	void execute() {
 		currentState = DOWN_TIME_INPUT;
-		hourInputManager->show(downHours, downMinutes, setDownTimeCallback);
+		hourInputManager->show(dataStore->downHours, dataStore->downMinutes, setDownTimeCallback);
 	}
 };
 DoDownTimeInput *doDownTimeInputCallback = new DoDownTimeInput();
@@ -268,6 +264,7 @@ void setup() {
 	loopManager.addLooper(timeDisplayLooper, 500);
 	loopManager.addLooper(hourInputManager, 100);
 	loopManager.addLooper(positionInputManager, 100);
+	loopManager.addLooper(autoPositionManager, 1000);
 
 	pinMode(BUTTONS_PIN, INPUT);
 

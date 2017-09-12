@@ -15,6 +15,10 @@ public:
 		currentPosition += stepValue;
 		stepper->step(stepValue);
 	}
+
+	void stepTo( long neededPosition ){
+		this->step( neededPosition - currentPosition );
+	}
 };
 
 #endif
