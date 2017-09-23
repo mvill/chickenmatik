@@ -85,7 +85,7 @@ public:
 
 	void handleButtonPressed(Button *button){
 		if( button == okButton ){
-			Serial.println("XXX");
+//			Serial.println("XXX");
 			showing = false;
 			currentItem->handler->execute();
 		}

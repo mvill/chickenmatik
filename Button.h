@@ -10,7 +10,6 @@ public:
 	//TODO virtual with impl? !
 	virtual bool isPressed(){
 		Serial.println("isPressed Button");
-
 	}
 };
 

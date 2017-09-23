@@ -22,7 +22,7 @@ DataStore *dataStore = new DataStore();
 //Stepper
 int numberOfSteps = 48 * 64;
 Stepper *stepper = new Stepper(numberOfSteps, 7, 9, 8, 6);
-StepperManager *stepperManager = new StepperManager(stepper);
+StepperManager *stepperManager = new StepperManager(stepper, dataStore);
 
 const int BUTTONS_PIN = A0;
 
@@ -71,6 +71,10 @@ public:
 		    	hPoint = " ";
 		    }
 
+//		    Serial.println("MMM");
+//		    Serial.println(now.hour());
+//		    Serial.println(now.minute());
+
 			String hourStr = number2digit(now.hour()) + hPoint + number2digit(now.minute());
 //			String hourStr = String(now.hour()) + ":" + String(now.minute()) + " " + String(now.day()) + "/" + String(now.month()) + "/" + String(now.year());
 
@@ -85,7 +89,7 @@ public:
 // STEPPER CALLBACKS
 class SetUpPositionCallback : public CallbackPositionInput{
 	void callback(long position) {
-		dataStore->upPosition = position;
+		dataStore->setUpPosition(position);
     	currentState = SCREEN_MAIN;
 	}
 };
@@ -93,7 +97,7 @@ SetUpPositionCallback *setUpPositionCallback = new SetUpPositionCallback();
 
 class SetDownPositionCallback : public CallbackPositionInput{
 	void callback(long position) {
-		dataStore->downPosition = position;
+		dataStore->setDownPosition(position);
     	currentState = SCREEN_MAIN;
 	}
 };
@@ -114,8 +118,8 @@ SetTimeCallback *setTimeCallback = new SetTimeCallback();
 
 class SetUpTimeCallback: public CallbackHourInput{
     void callback( uint8_t hours, uint8_t minutes ){
-    	dataStore->upHours = hours;
-    	dataStore->upMinutes = minutes;
+    	dataStore->setUpHours(hours);
+    	dataStore->setUpMinutes(minutes);
     	currentState = SCREEN_MAIN;
     }
 };
@@ -123,8 +127,8 @@ SetUpTimeCallback *setUpTimeCallback = new SetUpTimeCallback();
 
 class SetDownTimeCallback: public CallbackHourInput{
     void callback( uint8_t hours, uint8_t minutes ){
-    	dataStore->downHours = hours;
-    	dataStore->downMinutes = minutes;
+    	dataStore->setDownHours(hours);
+    	dataStore->setDownMinutes(minutes);
     	currentState = SCREEN_MAIN;
     }
 };
@@ -134,7 +138,7 @@ SetDownTimeCallback *setDownTimeCallback = new SetDownTimeCallback();
 
 
 HourInputManager *hourInputManager = new HourInputManager(buttonsManager, lcdManager, okButton, upButton, downButton);
-PositionInputManager *positionInputManager = new PositionInputManager(buttonsManager, lcdManager, stepperManager, okButton, upButton, downButton);
+PositionInputManager *positionInputManager = new PositionInputManager(buttonsManager, lcdManager, stepperManager, dataStore, okButton, upButton, downButton);
 
 AutoPositionManager *autoPositionManager = new AutoPositionManager(dataStore, timeHandler, stepperManager);
 
@@ -146,7 +150,7 @@ LoopManager loopManager;
 class DoTimeInput: public Executable{
 public:
 	void execute() {
-		Serial.println("CCC");
+//		Serial.println("CCC");
 		currentState = TIME_INPUT;
 		DateTime currentDatetime = timeHandler->getCurrentDate();
 		hourInputManager->show(currentDatetime.hour(), currentDatetime.minute(), setTimeCallback);
@@ -159,7 +163,7 @@ class DoUpTimeInput: public Executable{
 public:
 	void execute() {
 		currentState = UP_TIME_INPUT;
-		hourInputManager->show(dataStore->upHours, dataStore->upMinutes, setUpTimeCallback);
+		hourInputManager->show(dataStore->getUpHours(), dataStore->getUpMinutes(), setUpTimeCallback);
 	}
 };
 DoUpTimeInput *doUpTimeInputCallback = new DoUpTimeInput();
@@ -169,7 +173,7 @@ class DoDownTimeInput: public Executable{
 public:
 	void execute() {
 		currentState = DOWN_TIME_INPUT;
-		hourInputManager->show(dataStore->downHours, dataStore->downMinutes, setDownTimeCallback);
+		hourInputManager->show(dataStore->getDownHours(), dataStore->getDownMinutes(), setDownTimeCallback);
 	}
 };
 DoDownTimeInput *doDownTimeInputCallback = new DoDownTimeInput();
@@ -227,6 +231,9 @@ public:
 
 void setup() {
 
+	Serial.begin(9600);
+	dataStore->init();
+
 
 	lcd->begin(16, 2);
 
@@ -254,7 +261,6 @@ void setup() {
 
 //	getFreeRam();
 
-	Serial.begin(9600);
 
 	timeHandler->setup();
 

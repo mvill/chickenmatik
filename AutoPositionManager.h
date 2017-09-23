@@ -29,9 +29,9 @@ public:
 
 			DateTime nowDate = timeHandler->getCurrentDate();
 			DateTime upDate = DateTime(nowDate.year(), nowDate.month(),
-					nowDate.day(), dataStore->upHours, dataStore->upMinutes, 0);
+					nowDate.day(), dataStore->getUpHours(), dataStore->getUpMinutes(), 0);
 			DateTime downDate = DateTime(nowDate.year(), nowDate.month(),
-					nowDate.day(), dataStore->downHours, dataStore->downMinutes,
+					nowDate.day(), dataStore->getDownHours(), dataStore->getDownMinutes(),
 					0);
 //
 			long nowTime = nowDate.secondstime();
@@ -40,17 +40,17 @@ public:
 //
 			bool shouldBeUp = nowTime > upTime && nowTime < downTime;
 //
-			Serial.println("AAA");
+//			Serial.println("AAA");
 //			Serial.println(shouldBeUp);
-			Serial.println(stepperManager->currentPosition);
-			Serial.println(dataStore->upPosition);
-			Serial.println(dataStore->downPosition);
+//			Serial.println(dataStore->getCurrentPosition());
+//			Serial.println(dataStore->getUpPosition());
+//			Serial.println(dataStore->getDownPosition());
 //
 			if (shouldBeUp) {
-				stepperManager->stepTo(dataStore->upPosition);
+				stepperManager->stepTo(dataStore->getUpPosition());
 			}
 			else{
-				stepperManager->stepTo(dataStore->downPosition);
+				stepperManager->stepTo(dataStore->getDownPosition());
 			}
 
 		}

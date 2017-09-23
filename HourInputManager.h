@@ -103,12 +103,12 @@ public:
 				hourInputState = MINUTES;
 				break;
 			case MINUTES:
-				Serial.println("A1");
+//				Serial.println("A1");
 				showing = false;
-				Serial.println("A2");
+//				Serial.println("A2");
 				this->callbackHourInput->callback(inputHours, inputMinutes);
 
-				Serial.println("A3");
+//				Serial.println("A3");
 				break;
 			}
 		}

@@ -1,4 +1,5 @@
 #include "LcdManager.h"
+#include "DataStore.h"
 
 #ifndef PositionInputManager_h
 #define PositionInputManager_h
@@ -16,6 +17,7 @@ private:
 	ButtonsManager *buttonsManager;
 	LcdManager *lcdManager;
 	StepperManager *stepperManager;
+	DataStore *dataStore;
 	Button *okButton;
 	Button *upButton;
 	Button *downButton;
@@ -31,6 +33,7 @@ public:
 			ButtonsManager *buttonsManager,
 			LcdManager *lcdManager,
 			StepperManager *stepperManager,
+			DataStore *dataStore,
 			Button *okButton,
 			Button *upButton,
 			Button *downButton) {
@@ -38,6 +41,7 @@ public:
 				this->buttonsManager = buttonsManager;
 				this->lcdManager = lcdManager;
 				this->stepperManager = stepperManager;
+				this->dataStore = dataStore;
 				this->okButton = okButton;
 				this->upButton = upButton;
 				this->downButton = downButton;
@@ -53,8 +57,7 @@ public:
 			void handleButtonPressed(Button *button) {
 				if (button == this->okButton) {
 					showing = false;
-					callbackPositionInput->callback(stepperManager->currentPosition);
-
+					callbackPositionInput->callback(dataStore->getCurrentPosition());
 				}
 			}
 
